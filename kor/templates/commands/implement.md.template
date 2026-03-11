@@ -11,6 +11,29 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 - ../../analysis/tech-constraints.md — 기술 제약사항
 - prototype/ — UI 프로토타입 (이 디자인을 기반으로 구현)
 
+## 사전 체크
+
+1. ../../analysis/requirements.json에서 tech_stack 확인
+2. 필요한 환경변수 목록을 tech_stack 기반으로 결정:
+   - Google OAuth → GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+   - Turso → TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
+   - (PRD가 다른 DB/Auth를 지정하면 해당 변수로 대체)
+3. 현재 셸 환경에서 해당 변수들이 설정되었는지 확인 (echo $VAR)
+4. 미설정 변수가 있으면:
+   - 각 변수의 발급처와 설정 방법 안내
+   - 설정 후 다시 /implement 실행하라고 안내 후 중단
+
+## 기술 스택 결정
+
+1. ../../analysis/requirements.json의 tech_stack을 읽는다
+2. 아래는 기본값이며, requirements.json에 다른 기술이 명시되어 있으면 그것을 우선 사용:
+   - Framework: Next.js 15 (App Router, TypeScript, Tailwind CSS)
+   - Auth: Auth.js v5 + Google OAuth
+   - DB: Turso (libSQL) + Drizzle ORM
+   - UI: shadcn/ui + Lucide Icons
+   - Deploy: Vercel
+3. 이후 모든 설치·설정·코드 생성은 결정된 기술 스택에 맞게 조정한다
+
 ## Step 1: 프로젝트 초기화
 
 ```bash
@@ -115,6 +138,10 @@ export const db = createClient({
 - Drizzle 또는 raw SQL로 스키마 정의
 - `drizzle.config.ts` 설정
 - requirements.json의 features에 맞는 테이블 생성
+- Drizzle 설정 후 마이그레이션 실행:
+  npx drizzle-kit push
+  (또는 PRD의 DB에 맞는 마이그레이션 명령어)
+- 마이그레이션 성공 확인
 
 ## Step 6: API Route 패턴
 

@@ -14,6 +14,9 @@ For each AC item:
 
 ## Result Handling
 - If any items fail, create a list and pass to /iterate.
+- /iterate may be run a maximum of 3 times.
+- If items still fail after 3 iterations, output the remaining issue list and
+  display "Manual fixes required", then stop.
 - If all items pass, output "Implementation complete" message.
 
 ## Check Format

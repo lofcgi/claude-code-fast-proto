@@ -11,6 +11,29 @@ You are a senior developer implementing a full-stack web application in this dir
 - ../../analysis/tech-constraints.md — Technical constraints
 - prototype/ — UI prototype (implement based on this design)
 
+## Pre-flight Checks
+
+1. Read tech_stack from ../../analysis/requirements.json
+2. Determine required environment variables based on tech_stack:
+   - Google OAuth → GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+   - Turso → TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
+   - (If PRD specifies different DB/Auth, substitute with appropriate variables)
+3. Check if those variables are set in the current shell environment (echo $VAR)
+4. If any variables are missing:
+   - Guide where to obtain each variable and how to set it
+   - Instruct to set them and re-run /implement, then stop
+
+## Tech Stack Decision
+
+1. Read tech_stack from ../../analysis/requirements.json
+2. The following are defaults; if requirements.json specifies different technologies, prioritize those:
+   - Framework: Next.js 15 (App Router, TypeScript, Tailwind CSS)
+   - Auth: Auth.js v5 + Google OAuth
+   - DB: Turso (libSQL) + Drizzle ORM
+   - UI: shadcn/ui + Lucide Icons
+   - Deploy: Vercel
+3. All subsequent installation, configuration, and code generation must align with the decided tech stack
+
 ## Step 1: Project Initialization
 
 ```bash
@@ -115,6 +138,10 @@ export const db = createClient({
 - Define schema with Drizzle or raw SQL
 - Configure `drizzle.config.ts`
 - Create tables matching features in requirements.json
+- Run migration after Drizzle setup:
+  npx drizzle-kit push
+  (or the appropriate migration command for the PRD's DB)
+- Verify migration success
 
 ## Step 6: API Route Pattern
 
