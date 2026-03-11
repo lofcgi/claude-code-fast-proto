@@ -1,0 +1,39 @@
+---
+name: 버그 리포트
+about: 파이프라인 버그를 신고해주세요
+title: '[BUG] '
+labels: bug
+assignees: ''
+---
+
+## 설명
+버그에 대한 명확한 설명을 작성해주세요.
+
+## 재현 단계
+1. `/...` 실행
+2. ...
+
+## 예상 동작
+어떻게 동작해야 하는지 설명해주세요.
+
+## 실제 동작
+실제로 어떤 일이 발생했는지 설명해주세요.
+
+## 환경
+- OS:
+- Node.js 버전:
+- Claude Code 버전:
+
+## 파이프라인 단계
+버그가 발생한 스킬을 선택해주세요:
+- [ ] /analyze
+- [ ] /prototype
+- [ ] /setup-versions
+- [ ] /implement
+- [ ] /evaluate
+- [ ] /select-winner
+- [ ] /ship
+- [ ] /promote
+
+## 추가 정보
+로그, 스크린샷, 기타 관련 정보를 첨부해주세요.
