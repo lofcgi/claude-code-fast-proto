@@ -5,6 +5,16 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, "mcp:vercel:*", "mcp:github
 
 project/ 폴더의 앱을 배포하고 문서를 생성하세요.
 
+## 사전 체크
+
+1. Vercel CLI 로그인 확인: npx vercel whoami
+   → 실패 시 "npx vercel login 실행 후 다시 시도하세요" 안내 후 중단
+2. 필요한 환경변수 확인:
+   - AUTH_SECRET (없으면 npx auth secret으로 생성 가능 안내)
+   - AUTH_URL (배포 후 설정 가능 안내)
+   - DB 관련 변수 (이미 /implement에서 설정되었을 것)
+3. GITHUB_TOKEN 확인 (PR 생성 시 필요)
+
 ## 수행 작업
 
 1. project/ 내에서:

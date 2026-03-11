@@ -5,6 +5,16 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, "mcp:vercel:*", "mcp:github
 
 Deploy the app in project/ and generate documentation.
 
+## Pre-flight Checks
+
+1. Verify Vercel CLI login: npx vercel whoami
+   → If it fails, display "Run npx vercel login first, then retry" and stop
+2. Check required environment variables:
+   - AUTH_SECRET (if missing, guide: can be generated with npx auth secret)
+   - AUTH_URL (can be set after deployment)
+   - DB-related variables (should already be set from /implement)
+3. Check GITHUB_TOKEN (needed for PR creation)
+
 ## Tasks
 
 1. In project/:

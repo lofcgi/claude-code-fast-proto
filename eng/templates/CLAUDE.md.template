@@ -4,6 +4,13 @@
 {{PROJECT_DESCRIPTION}}
 
 ## Tech Stack
+<!-- {{TECH_STACK}} renders tech_stack from requirements.json as a markdown bullet list:
+- Framework: Next.js 15 (App Router)
+- DB: Turso + Drizzle ORM
+- Auth: Auth.js v5 + Google OAuth
+- UI: shadcn/ui + Tailwind CSS
+- Deploy: Vercel
+-->
 {{TECH_STACK}}
 
 ### Default Stack (used when not specified in PRD)

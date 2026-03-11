@@ -4,6 +4,13 @@
 {{PROJECT_DESCRIPTION}}
 
 ## 기술 스택
+<!-- {{TECH_STACK}}는 requirements.json의 tech_stack을 마크다운 불릿 리스트로 렌더링:
+- Framework: Next.js 15 (App Router)
+- DB: Turso + Drizzle ORM
+- Auth: Auth.js v5 + Google OAuth
+- UI: shadcn/ui + Tailwind CSS
+- Deploy: Vercel
+-->
 {{TECH_STACK}}
 
 ### 기본 스택 (PRD에 별도 명시 없으면 사용)
