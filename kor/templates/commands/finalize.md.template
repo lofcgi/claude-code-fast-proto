@@ -1,0 +1,19 @@
+---
+description: 최종 정리
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+---
+
+최종 정리를 수행하세요.
+
+## 참조 문서
+- ../analysis/prd.md — 요구사항
+- ../analysis/requirements.json — 기능 목록
+
+## 수행 작업
+
+1. 불필요한 console.log 제거
+2. 미사용 import 정리
+3. TODO/FIXME 주석 해결
+4. package.json 정리 (미사용 의존성 제거)
+5. .env.example 업데이트
+6. `npm run build`로 최종 빌드 확인

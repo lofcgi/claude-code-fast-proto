@@ -1,0 +1,19 @@
+---
+description: Final cleanup
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+---
+
+Perform final cleanup.
+
+## Reference Documents
+- ../analysis/prd.md — Requirements
+- ../analysis/requirements.json — Feature list
+
+## Tasks
+
+1. Remove unnecessary console.log statements
+2. Clean up unused imports
+3. Resolve TODO/FIXME comments
+4. Clean up package.json (remove unused dependencies)
+5. Update .env.example
+6. Verify final build with `npm run build`

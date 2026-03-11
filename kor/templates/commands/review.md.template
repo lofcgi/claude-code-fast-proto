@@ -1,0 +1,24 @@
+---
+description: 시니어 개발자 관점 코드 리뷰
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+---
+
+시니어 개발자 관점에서 전체 코드를 리뷰하세요.
+
+## 참조 문서
+- ../analysis/prd.md — 요구사항
+- ../analysis/requirements.json — 기능 목록
+
+## 관점
+
+1. **보안**: OWASP Top 10, API 키 노출, XSS/CSRF
+2. **성능**: 불필요한 리렌더링, N+1 쿼리, 번들 사이즈
+3. **코드 품질**: DRY, 타입 안전성, 에러 핸들링
+4. **아키텍처**: 관심사 분리, 파일 구조
+
+## 수행 작업
+
+1. 전체 코드를 읽고 문제점 식별
+2. 발견한 문제를 심각도(High/Medium/Low)로 분류
+3. 각 문제를 수정
+4. `npm run build`로 빌드 확인

@@ -1,0 +1,24 @@
+---
+description: Senior developer code review
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+---
+
+Review all code from a senior developer's perspective.
+
+## Reference Documents
+- ../analysis/prd.md — Requirements
+- ../analysis/requirements.json — Feature list
+
+## Focus Areas
+
+1. **Security**: OWASP Top 10, API key exposure, XSS/CSRF
+2. **Performance**: Unnecessary re-renders, N+1 queries, bundle size
+3. **Code quality**: DRY, type safety, error handling
+4. **Architecture**: Separation of concerns, file structure
+
+## Tasks
+
+1. Read all code and identify issues
+2. Classify found issues by severity (High/Medium/Low)
+3. Fix each issue
+4. Verify with `npm run build`
