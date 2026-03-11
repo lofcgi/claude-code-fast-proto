@@ -24,6 +24,8 @@ claude
 /analyze
 ```
 
+> **Detailed guide / 상세 가이드:** [`eng/README.md`](./eng/README.md) (English) | [`kor/README.md`](./kor/README.md) (한국어)
+
 ## Choose Your Language / 언어 선택
 
 | Language | Directory | Description |
@@ -70,6 +72,8 @@ Each folder is a **fully independent, self-contained pipeline**. You can delete 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
 - Node.js 18+
 - Git
+- Accounts (Google Cloud, Turso, Vercel) are needed later at `/implement` and `/ship` stages, not to start
+- 계정(Google Cloud, Turso, Vercel)은 `/implement`와 `/ship` 단계에서 필요하며, 시작할 때는 불필요합니다
 
 ## License
 
