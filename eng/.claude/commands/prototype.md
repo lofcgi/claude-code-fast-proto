@@ -13,6 +13,7 @@ Read analysis/prd.md and generate 3 UI interface prototypes.
    - Crawl competitor apps or similar services mentioned in the PRD using Firecrawl
    - Analyze UI layouts, navigation patterns, and key feature placement
    - Use findings to inform prototype design
+   → If MCP unavailable: Skip this step and proceed. Inform the user: "Skipping competitor UI research — Firecrawl not connected."
 
 2. Determine 3 interface concepts:
    - Interface A: Minimal (single page, focused on core features)
@@ -33,4 +34,7 @@ Read analysis/prd.md and generate 3 UI interface prototypes.
 If v0 MCP is configured, use the v0_generate_ui tool.
 If not, write React + shadcn/ui code directly.
 
-5. Present a summary of all 3 prototypes to the user and ask for selection
+5. Summarize all 3 prototypes in a table:
+   | Prototype | Concept | Pros | Cons |
+   Ask the user to choose, then after selection guide:
+   "Selection complete. Next step: run /setup-versions {a|b|c}"
