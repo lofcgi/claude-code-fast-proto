@@ -83,7 +83,41 @@ Read analysis/prd.md and generate 3 UI interface prototypes.
      - CTA button styles and placement strategies
    - **You MUST record all results in `prototypes/research.md`**
 
-6. **Curate domain-relevant images via Unsplash API** (only when UNSPLASH_ACCESS_KEY is available):
+6. **🆕 Premium Component Mapping — Scrape Aceternity UI & Magic UI galleries with Firecrawl**:
+   - Scrape `https://ui.aceternity.com/components` → extract list of premium component names + descriptions
+   - Scrape `https://magicui.design/docs/components` → extract list of animation component names + descriptions
+   - Map PRD sections to premium components and record in research.md §7:
+     ```
+     ## 7. Premium Component Mapping
+     PRD section → premium component mapping:
+     - Hero: AuroraBackground, HeroParallax, LampEffect, BackgroundBeams
+     - Features: BentoGrid, CardSpotlight, GlareCard, MagicCard
+     - Social Proof: InfiniteMovingCards, AnimatedBeam, NumberTicker
+     - Background: SparklesCore, Meteors, DotPattern, GridPattern
+     - Navigation: FloatingNavbar, FloatingDock
+     - Text: TextGenerateEffect, TypingAnimation, BlurIn
+     ```
+
+7. **🆕 Anti-Patterns List — Record in research.md §8**:
+   ```
+   ## 8. Anti-Patterns (BANNED)
+   - Symmetric 3-column equal grid (→ use BentoGrid instead)
+   - Center-aligned-only layout (→ use asymmetric placement)
+   - Flat cards without hover effects (→ use Spotlight/Glare effects)
+   - Gray placeholder boxes (→ use CSS mockups or gradients)
+   - linear easing animations (→ use spring physics)
+   - Single-layer backgrounds (→ use layered: gradient + pattern + particles)
+   - Uniform section heights (→ vary dramatically: min-h-screen hero, compact stats)
+   ```
+
+8. **🆕 Scrape additional premium references with Firecrawl** (beyond competitor apps):
+   - `https://stripe.com/` — bento grid, real product mockups, depth layers
+   - `https://perso.ai/` — AI service landing benchmark
+   - `https://height.app/` — SVG wave hero backgrounds
+   - Use WebSearch to find 1-2 additional trending award-winning landing pages
+   - Record visual techniques discovered in research.md §4 (Design References)
+
+9. **Curate domain-relevant images via Unsplash API** (only when UNSPLASH_ACCESS_KEY is available):
    - Scrape Unsplash search result pages using Firecrawl `firecrawl_scrape`:
      - 3-4 PRD domain-related keywords (e.g., "productivity app", "task management", "team collaboration")
      - Hero background keywords (e.g., "abstract gradient", "minimalist workspace", "dark abstract")
@@ -95,7 +129,7 @@ Read analysis/prd.md and generate 3 UI interface prototypes.
    - Unsplash image URL format: `https://images.unsplash.com/photo-{id}?w={width}&h={height}&fit=crop&q=80`
    - **If no UNSPLASH_ACCESS_KEY**: use picsum.photos and CSS gradients as fallback (skip this step)
 
-7. **Write `prototypes/research.md` structured with these 6 sections**:
+10. **Write `prototypes/research.md` structured with these 8 sections** (6 if no Unsplash):
    ```markdown
    # Design Research
 
@@ -158,17 +192,36 @@ Read analysis/prd.md and generate 3 UI interface prototypes.
    ### For Concept C
    - Hero: URL + description
    - Feature 1: URL + description
+
+   ## 7. Premium Component Mapping
+   PRD section → premium component mapping:
+   - Hero: {selected from Aceternity/Magic UI scrape}
+   - Features: {selected from Aceternity/Magic UI scrape}
+   - Social Proof: {selected from Aceternity/Magic UI scrape}
+   - Background: {selected from Aceternity/Magic UI scrape}
+   - Navigation: {selected from Aceternity/Magic UI scrape}
+   - Text: {selected from Aceternity/Magic UI scrape}
+
+   ## 8. Anti-Patterns (BANNED)
+   - Symmetric 3-column equal grid (→ use BentoGrid)
+   - Center-aligned-only layout (→ asymmetric placement)
+   - Flat cards without hover effects (→ Spotlight/Glare)
+   - Gray placeholder boxes (→ CSS mockups or gradients)
+   - linear easing animations (→ spring physics)
+   - Single-layer backgrounds (→ gradient + pattern + particles)
+   - Uniform section heights (→ vary: min-h-screen hero, compact stats)
    ```
 
-8. **Capture reference app screenshots with Playwright and save**:
+11. **Capture reference app screenshots with Playwright and save**:
    - Select 2-3 URLs from the design references section of research.md
    - For each URL, run `browser_navigate` → `browser_take_screenshot`
    - Save screenshots to `prototypes/references/` directory (filename: `ref-{appname}.png`)
    - Add screenshot paths to the "Design References" section of research.md
    - Also capture screenshots of landing page reference URLs discovered in step 5
+   - **Also capture screenshots of Stripe, Perso.ai, Height.app** for premium reference
    - These screenshots will be used as visual references for v0 prompts in Phase 4 or as Claude Code fallback references
 
-> **CHECKPOINT**: Verify `prototypes/research.md` contains 6 sections (5 if no Unsplash) (including 3 palettes) and `prototypes/references/` contains at least 2 screenshots.
+> **CHECKPOINT**: Verify `prototypes/research.md` contains 8 sections (7 if no Unsplash) including 3 palettes, Premium Component Mapping (§7), Anti-Patterns (§8), and `prototypes/references/` contains at least 2 screenshots.
 
 ---
 
@@ -204,11 +257,19 @@ Define 3 interface concepts based on `prototypes/research.md` and `analysis/prd.
    (e.g., "Full-screen Hero with gradient → 3-feature showcase → social proof → footer CTA → navigate to /a/app")
 9. **Animation direction**: transition/scroll animation style suited to this concept
    (e.g., "fade-up on scroll, smooth section transitions, hover scale on cards")
+10. **🆕 Premium Component Selection** (MUST select from research.md §7):
+    - Hero technique: {AuroraBackground | HeroParallax | LampEffect | BackgroundBeams} — **all 3 concepts MUST use different Hero techniques**
+    - Feature layout: {BentoGrid | CardSpotlight Grid | GlareCard Row | MagicCard Grid} — **at least 1 concept MUST use BentoGrid**
+    - Social Proof: {InfiniteMovingCards | AnimatedBeam | NumberTicker}
+    - Background decoration: 1-2 from {SparklesCore, DotPattern, Meteors, GridPattern}
+    - Text animation: {TextGenerateEffect | TypingAnimation | BlurIn}
+    - Navigation: {FloatingNavbar | FloatingDock}
 
 - The 3 concepts MUST represent fundamentally different UX paradigms
 - The 3 concepts MUST use different visual identities (palettes)
+- **🆕 The 3 concepts MUST use different Hero techniques — structural differentiation, not just color**
 
-> **CHECKPOINT**: Verify `prototypes/concepts.md` has 3 concepts each assigned a different Palette, each concept defines at least 3 pages (including landing), and each concept's page flow reflects its unique character.
+> **CHECKPOINT**: Verify `prototypes/concepts.md` has 3 concepts each assigned a different Palette AND different Hero technique, each concept defines at least 3 pages (including landing), each concept's page flow reflects its unique character, and field 10 (Premium Component Selection) is fully specified for all 3.
 
 ---
 
@@ -225,7 +286,7 @@ b) **Install shadcn/ui + dependencies**:
    cd prototypes/_app
    npx shadcn@latest init -t next
    npx shadcn@latest add button input checkbox badge dropdown-menu select dialog avatar scroll-area separator table textarea card
-   npm install lucide-react framer-motion
+   npm install lucide-react framer-motion mini-svg-data-uri
    ```
 
 c) **Shared layout** (app/layout.tsx):
@@ -242,6 +303,103 @@ d) **Add external image domains to `next.config.ts`**:
        { protocol: 'https', hostname: 'illustrations.popsy.co' },  // free illustrations
      ],
    },
+   ```
+
+e) **🆕 Create `components/premium/` directory**:
+   ```bash
+   mkdir -p prototypes/_app/components/premium
+   ```
+   This directory will hold Aceternity/Magic UI component code copied in Phase 4.
+
+f) **🆕 Add premium utility CSS to `app/globals.css`** (append after existing styles):
+   ```css
+   /* === Premium Visual Utilities === */
+
+   /* Aurora animation */
+   @keyframes aurora {
+     0%, 100% { background-position: 50% 50%, 50% 50%; }
+     50% { background-position: 100% 50%, 0% 50%; }
+   }
+   .animate-aurora {
+     animation: aurora 15s ease infinite;
+     background-size: 300% 300%, 200% 200%;
+   }
+
+   /* Grain/Noise texture overlay */
+   .bg-noise::after {
+     content: "";
+     position: absolute;
+     inset: 0;
+     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+     opacity: 0.02;
+     pointer-events: none;
+     z-index: 1;
+   }
+
+   /* Grid pattern background */
+   .bg-grid {
+     background-image:
+       linear-gradient(to right, hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+       linear-gradient(to bottom, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+     background-size: 40px 40px;
+   }
+
+   /* Dot pattern background */
+   .bg-dots {
+     background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+     background-size: 24px 24px;
+     opacity: 0.15;
+   }
+
+   /* Infinite marquee */
+   @keyframes marquee {
+     from { transform: translateX(0); }
+     to { transform: translateX(-50%); }
+   }
+   .animate-marquee {
+     animation: marquee 30s linear infinite;
+   }
+
+   /* Shimmer / skeleton loading */
+   @keyframes shimmer {
+     from { background-position: -200% 0; }
+     to { background-position: 200% 0; }
+   }
+   .animate-shimmer {
+     background: linear-gradient(90deg, transparent 25%, hsl(var(--foreground) / 0.05) 50%, transparent 75%);
+     background-size: 200% 100%;
+     animation: shimmer 2s ease-in-out infinite;
+   }
+
+   /* Spotlight cursor-following glow (used with JS for mouse position) */
+   .card-spotlight {
+     position: relative;
+     overflow: hidden;
+   }
+   .card-spotlight::before {
+     content: "";
+     position: absolute;
+     inset: 0;
+     background: radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), hsl(var(--primary) / 0.06), transparent 40%);
+     pointer-events: none;
+     z-index: 1;
+   }
+
+   /* Glow effect for buttons and cards */
+   .glow {
+     box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+   }
+   .glow-hover:hover {
+     box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5);
+   }
+   ```
+
+g) **🆕 Extend `lib/utils.ts`** — add noise pattern generator utility alongside existing `cn()`:
+   ```typescript
+   // Add after cn() function:
+   export function generateNoisePattern(opacity: number = 0.02): string {
+     return `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='${opacity}'/%3E%3C/svg%3E")`;
+   }
    ```
 
 ---
@@ -283,31 +441,80 @@ Design reference apps: {references extracted from research.md — e.g., "Notion'
   - CSS gradients, subtle background patterns (dot grid, radial gradient)
   - Domain-related visuals: {insert visual asset direction from concepts.md}
 - "NO external API calls" exception: picsum.photos static image URLs are allowed
-- Quality: Notion/Linear/Vercel Dashboard level — pixel-perfect spacing, subtle transitions (150-200ms),
-  hover states on all interactive elements, focus rings, smooth animations (framer-motion style CSS)
+
+### 🆕 App Page Premium Requirements
+- Sidebar/Nav: glass-morphism (backdrop-blur-md, bg-white/5 or bg-black/20, subtle 1px border at 10% opacity)
+- Cards: MUST have hover effect — border glow OR cursor-following spotlight (radial-gradient that follows mouse)
+- Data tables: zebra striping at 0.02 opacity, sticky header with backdrop-blur
+- Empty states: CSS abstract shape illustrations (gradient blobs, geometric shapes) — NO plain text only
+- Micro-interactions: button press scale(0.97) transition, input focus primary glow ring (ring-2 ring-primary/30)
+- All animations: spring physics `{ type: "spring", stiffness: 200, damping: 25 }` — NEVER use linear or ease-in-out
+
+- Quality: Stripe/Vercel Dashboard level — pixel-perfect spacing, spring transitions,
+  hover states on ALL interactive elements, focus rings, smooth animations (framer-motion)
 - Responsive: mobile-first, graceful degradation from desktop to mobile
 - NO database, NO authentication — pure UI prototype with useState/useReducer
 ```
 
-### Landing Page Prompt Template
+### Landing Page Prompt Template (🆕 PREMIUM REWRITE)
 
 Use the template below when generating the landing page (`/{x}`) for each prototype:
 
 ```
 ## 1. Product Surface
-Build a modern landing page for {project_name} — a {one-line project description}.
+Build a premium landing page for {project_name} — a {one-line project description}.
 This is NOT the app itself, but a marketing/introduction page that showcases the product.
+Visual benchmark: Stripe.com, Vercel.com, Linear.app — NOT a generic Bootstrap template.
 
-Sections (in order):
-1. **Hero**: Large headline + subtext + Primary CTA button ("Get Started" / "Try Now" → /{x}/app link)
-2. **Feature Showcase**: Visualize 3-4 core features as cards/grid (icon + title + description)
-3. **App Preview**: App UI mockup or screenshot area (picsum placeholder or CSS mockup)
-4. **Social Proof / Stats**: User count, completed tasks, etc. as number stats or 2-3 testimonial cards
-5. **CTA Footer**: Final call-to-action section + Secondary CTA button
+## 2. Visual Architecture (CRITICAL — follow exactly)
 
-## 2. Context of Use
-Target users: {PRD target users} — this landing page communicates product value to first-time visitors.
-Design reference: {research.md landing page patterns section content} — modern SaaS landing in perso.ai, linear.app style
+### Hero Section
+- Technique: {concepts.md field 10 Hero technique for this concept}
+- Implementation:
+  - FULL VIEWPORT HEIGHT (min-h-screen). This is non-negotiable.
+  - Background: radial-gradient (primary→transparent, positioned top-center) LAYERED WITH
+    CSS grid/dot pattern overlay (0.04 opacity) AND grain noise overlay (0.02 opacity).
+    Minimum 3 visual layers in the hero background.
+  - Headline: TextGenerateEffect (word-by-word 0.8s stagger fade-in) OR TypingAnimation OR BlurIn
+    — as specified in concepts.md field 10.
+  - CTA button: primary color with glow shadow that pulses subtly (box-shadow animation).
+  - Layout: AVOID centering everything in a narrow column vertically.
+    Use ASYMMETRIC layout (headline left-aligned + right-side visual) OR full-wide dramatic center WITH depth layers.
+  - Floating navigation bar: glass-morphism (backdrop-blur-md, bg-white/5, border-white/10)
+
+### Feature Section
+- Technique: {concepts.md field 10 Feature layout for this concept}
+- If BentoGrid: "CSS grid with repeat(3, 1fr). First item col-span-2 (large card with mockup).
+  Items 2-3 are 1x1. Item 4 is col-span-2 (stats or testimonial).
+  Each card: cursor-following spotlight on hover (radial gradient that follows mouse),
+  subtle border (1px, 10% opacity), backdrop-blur-sm.
+  ABSOLUTELY NO symmetric 3-equal-column layout."
+- If CardSpotlight: "Cards with radial-gradient glow that follows cursor position.
+  Staggered grid layout — NOT symmetric. Mix card sizes."
+- Each feature card must have:
+  - Hover transform (scale 1.02 + border color shift + glow intensify)
+  - Spring physics animation on scroll enter `{ type: "spring", stiffness: 200, damping: 25 }`
+  - At least 2 visual layers (icon/visual + text content)
+
+### Social Proof Section
+- Technique: {concepts.md field 10 Social Proof for this concept}
+- If InfiniteMovingCards: "Horizontal auto-scrolling testimonial cards.
+  Glass-morphism effect (bg-white/5 backdrop-blur-md border-white/10).
+  30s loop, duplicate array 2x for seamless marquee."
+- If NumberTicker: "Large animated counting numbers (count-up on scroll into view).
+  Minimum 3 stats. Each number animates independently with stagger."
+- If AnimatedBeam: "Connected node visualization showing data flow or user connections."
+
+### All Sections — Common Rules (NON-NEGOTIABLE)
+- Animations: MUST use spring physics `{ type: "spring", stiffness: 200, damping: 25 }`.
+  BANNED: linear, ease-in-out, ease-in, ease-out easing.
+- Depth: Every section MUST have minimum 2 visual layers (background effect + content).
+  Examples: gradient bg + grid pattern, blur blobs + card content, particles + text.
+- Asymmetry: Minimum 2 sections MUST use non-centered, asymmetric layout.
+- Hover: ALL interactive elements must have transform hover (scale, glow, border-color shift, gradient shift).
+- Grain: All gradient backgrounds must include noise overlay (opacity 0.015-0.03).
+- Spacing: Section padding minimum py-32 (NOT py-24). Hero MUST be min-h-screen.
+- Background decoration: {concepts.md field 10 background decoration — e.g., SparklesCore, DotPattern, Meteors}
 
 ## 3. Constraints & Taste
 - Next.js 15 App Router, TypeScript
@@ -315,28 +522,28 @@ Design reference: {research.md landing page patterns section content} — modern
 - Tailwind CSS + shadcn/ui components (import from @/components/ui/*)
 - Available shadcn: button, input, card, badge, avatar, separator
 - Icons: lucide-react only
-- **framer-motion**: use for scroll animations
-  - Hero: fade-in + slide-up (duration 0.8s, delay stagger)
-  - Feature cards: scroll-triggered fade-up (whileInView)
+- **framer-motion**: MANDATORY for all animations
+  - Hero: fade-in + slide-up with spring physics (stagger children)
+  - Feature cards: scroll-triggered entrance (whileInView) with translate+fade (NOT fade only)
   - Stats: count-up animation on scroll
-  - Sections: smooth reveal on viewport entry
+  - Sections: smooth reveal on viewport entry with spring
 - Color palette: {concepts.md Palette hex}
 - Mode: {dark/light}
 - Visual mood: {Palette Mood description}
 - Visual assets (image strategy to make the landing page visually rich):
-  - **Hero background**: CSS gradient (radial/linear gradient with blur overlay) + background dot/grid pattern
-  - **Feature section images**: Use Unsplash URLs directly from research.md "Curated Images" section. If unavailable, use `https://picsum.photos/800/400?random={n}` or CSS mockups
-  - **App Preview / Mockup**: Capture Playwright screenshots of the actual app page (/{x}/app) and use them, or recreate app UI inside a CSS browser frame
-  - **Testimonial avatars**: https://picsum.photos/40/40?random={n} (face placeholders)
-  - **Feature icons**: lucide-react icons placed inside gradient background circles
-  - **Trust elements**: Fake brand logo marquee made with SVG (CSS animation)
-  - **Illustrations**: CSS-only decorative elements (blur blob, gradient orb, floating shapes)
+  - **Hero background**: CSS gradient (radial/linear with blur overlay) + grid/dot pattern + grain noise
+  - **Feature section images**: Use Unsplash URLs from research.md. If unavailable, use `https://picsum.photos/800/400?random={n}` or CSS mockups
+  - **App Preview / Mockup**: Capture Playwright screenshots of actual app page (/{x}/app) and use, or recreate app UI inside a CSS browser frame
+  - **Testimonial avatars**: https://picsum.photos/40/40?random={n}
+  - **Feature icons**: lucide-react icons inside gradient background circles
+  - **Trust elements**: Fake brand logo marquee with CSS animation (animate-marquee)
+  - **Illustrations**: CSS-only decorative elements (blur blobs, gradient orbs, floating shapes)
 - Typography: Inter or system font
   - Hero headline: text-5xl md:text-7xl font-bold
   - Sub text: text-xl text-muted-foreground
   - Section titles: text-3xl font-semibold
 - NO database, NO authentication — pure static landing page
-- Quality: perso.ai / linear.app level — full-screen Hero, smooth scroll animations, generous spacing (py-24+)
+- Quality: Stripe.com / Vercel.com level — full-screen Hero, spring scroll animations, generous spacing (py-32+), layered backgrounds, glass-morphism nav
 ```
 
 ### Execution Steps
@@ -361,13 +568,17 @@ Design reference: {research.md landing page patterns section content} — modern
 
 4. **If v0 code causes build errors**: send error message via `sendChatMessage` to request fix (max 2 times)
 
-> **v0 Failure Fallback** — only if v0 API fails after 3 attempts:
+> **v0 Failure Fallback (🆕 ENHANCED)** — only if v0 API fails after 3 attempts:
 > 1. Notify user: "v0 API connection failed. Proceeding with Claude Code direct generation as fallback."
-> 2. Compose a detailed prompt from research.md's design system (color hex codes, typography, layout patterns)
-> 3. Reference screenshots in `prototypes/references/` using Read
-> 4. For each prototype: "Implement a {concept_name} interface referencing this screenshot's layout and style.
->    Apply the following design system: {full color/typography/component spec from research.md}"
-> 5. Verify that research.md hex codes, component list, and layout patterns are reflected in the code
+> 2. **Use Context7 MCP to fetch premium component code**:
+>    - Call `resolve-library-id("aceternity-ui")` → `query-docs("{component name from concepts.md field 10}")`
+>    - Call `resolve-library-id("magic-ui")` → `query-docs("{component name from concepts.md field 10}")`
+>    - Extract component source code and save to `components/premium/` directory
+> 3. Compose detailed prompt from research.md design system (color hex, typography, layout patterns)
+> 4. Reference screenshots in `prototypes/references/` using Read
+> 5. For each prototype: import premium components from `components/premium/` and assemble pages
+>    following the Visual Architecture spec from the landing page template above
+> 6. Verify that research.md hex codes, premium component usage, and anti-patterns (§8) compliance
 >
 > ⚠️ Use this fallback ONLY when v0 completely fails — if v0 works, always use v0
 
@@ -375,18 +586,47 @@ Design reference: {research.md landing page patterns section content} — modern
 
 ---
 
-## Phase 5: Component Polishing (21st-dev builder + refiner)
+## Phase 5: Component Polishing (21st-dev builder + refiner) — 🆕 3-ROUND SYSTEM
 
-1. Select the most critical UI component from each prototype's **main page** (e.g., task card, kanban column, stat widget)
+### Round 1: Landing Page Polishing (🆕 NEW)
 
-2. **Call `21st_magic_component_builder` to generate a high-quality version of that component**
-   - Integrate the generated component into the prototype
+1. **For each prototype's landing page** — call `21st_magic_component_builder` to generate a premium Hero component (3 calls total):
+   - Input: "Build a {Hero technique from concepts.md field 10} hero section with {Palette hex} colors, spring animations, layered background"
 
-3. **Pass each prototype's main page file in full to `21st_magic_component_refiner` for polishing** (exclude other pages — API cost management)
-   - Refiner input: current code + "Polish to Notion/Linear level — spacing, transitions, hover states, typography"
-   - Update the file with refiner results
+2. **For each prototype's landing page** — call `21st_magic_component_refiner` for full-page polish (3 calls total):
+   - Refiner input: current landing page code + the following specific instructions:
+   ```
+   Polish to Stripe/Vercel level:
+   1. Add grain texture (noise overlay 0.02 opacity) to all gradient backgrounds
+   2. Replace all framer-motion easing with spring physics { type: "spring", stiffness: 200, damping: 25 }
+   3. Add cursor-following spotlight effect to feature cards (radial-gradient that follows mouse)
+   4. Verify asymmetric layout — if everything is centered in equal columns, restructure to bento/asymmetric
+   5. Add subtle parallax on scroll (background moves slower than foreground)
+   6. Ensure all hover states include transform + transition (scale, glow, border-color shift)
+   7. Hero MUST be min-h-screen with minimum 3 background layers
+   ```
+   - Update files with refiner results
 
-> **CHECKPOINT**: Verify builder 1x + refiner 1x per prototype = minimum 6 calls total. If under, make additional calls.
+### Round 2: App Page Polishing (existing, enhanced)
+
+3. Select the most critical UI component from each prototype's **main app page** (e.g., task card, kanban column, stat widget)
+
+4. **Call `21st_magic_component_builder` to generate high-quality versions** — but only if Round 1 builder results were not already applied to app pages
+
+5. **Pass each prototype's main app page to `21st_magic_component_refiner` for polishing** (3 calls total):
+   - Refiner input: current code + "Polish micro-interactions: button press scale(0.97), input focus glow ring, card hover spotlight, glass-morphism sidebar, spring physics on all transitions"
+   - Update files with refiner results
+
+### Round 3: Cross-Differentiation Verification (🆕 NEW)
+
+6. **Compare all 3 landing pages side by side**:
+   - Read all 3 landing page files
+   - Check: Do any two share the same Hero structure? Same feature layout pattern? Same background decoration?
+   - If any two prototypes are structurally too similar:
+     - Call `21st_magic_component_refiner` on the less differentiated one with specific restructuring instructions (max 3 additional calls)
+     - Example: "This landing uses the same bento grid as Prototype A. Restructure features as a vertical alternating layout (image left/text right, then text left/image right) instead."
+
+> **CHECKPOINT**: Verify Round 1 (3 builder + 3 refiner) + Round 2 (3 refiner) + Round 3 (0-3 refiner) = minimum 9 calls, maximum 12 calls total. All 3 landing pages must be structurally distinct.
 
 ---
 
@@ -401,16 +641,22 @@ Design reference: {research.md landing page patterns section content} — modern
 
 3. If errors occur, send fix request to v0 via `sendChatMessage` (max 3 times)
 
-4. Include README.md for each prototype (prototypes/interface-{a,b,c}/README.md):
+4. **🆕 Verify premium infrastructure**:
+   - Confirm `components/premium/` directory exists (even if empty — used by fallback)
+   - Confirm `globals.css` contains premium keyframes (aurora, marquee, shimmer)
+   - Confirm `lib/utils.ts` contains `generateNoisePattern` function
+
+5. Include README.md for each prototype (prototypes/interface-{a,b,c}/README.md):
    - Design concept description
    - Screen layout explanation (including multi-page structure)
+   - Premium components used (from concepts.md field 10)
    - Pros and cons
 
-> **CHECKPOINT**: Verify `npm run build` succeeds. Do NOT proceed to Phase 7 if it fails.
+> **CHECKPOINT**: Verify `npm run build` succeeds AND premium infrastructure is in place. Do NOT proceed to Phase 7 if build fails.
 
 ---
 
-## Phase 7: Visual Verification (Playwright)
+## Phase 7: Visual Verification (Playwright) — 🆕 PREMIUM QUALITY SCORECARD
 
 1. Start the dev server:
    ```bash
@@ -425,7 +671,13 @@ Design reference: {research.md landing page patterns section content} — modern
      - `http://localhost:3000/b/...` (Interface B all pages)
      - `http://localhost:3000/c/...` (Interface C all pages)
 
-3. **Analyze each screenshot with Read** — using Claude multimodal vision:
+3. **🆕 Scroll-based screenshots** — for each landing page:
+   - Take screenshots at 5 scroll positions: 0%, 25%, 50%, 75%, 100%
+   - Use Playwright `browser_evaluate` with `window.scrollTo(0, document.body.scrollHeight * {pct})`
+   - Then `browser_take_screenshot` at each position
+   - This verifies scroll animations trigger correctly at different viewport positions
+
+4. **Analyze each screenshot with Read** — using Claude multimodal vision:
    - Check for blank pages, error messages, or broken layouts
    - Check spacing/alignment issues
    - Check color contrast problems
@@ -440,21 +692,53 @@ Design reference: {research.md landing page patterns section content} — modern
      - Hero section fills the viewport (full-screen hero)
      - CTA button is clear and links to app page
      - Scroll animations are smooth (screenshot after Playwright scroll)
-     - Sufficient spacing between sections (py-24 or more)
+     - Sufficient spacing between sections (py-32 or more)
      - Visual consistency between landing and app pages (same palette)
      - **Image/visual richness**: If only text + icons, flag as issue — at least 2 of these visual elements must be present: Hero background gradient, App Preview mockup, Feature images
      - **App Preview mockup**: If possible, capture Playwright screenshots of app pages and use in the landing page's App Preview section
-   - **List specific shortcomings compared to "Notion/Linear level"**
 
-4. **Fix discovered issues in the code**:
-   - Fix listed issues in priority order
+5. **🆕 Premium Quality Scorecard** (evaluate per prototype, record results):
+
+   ```
+   ### Premium Quality Scorecard — Prototype {A/B/C}
+
+   **Structure (ALL must pass)**
+   [ ] Hero is min-h-screen
+   [ ] At least 1 section uses asymmetric/bento layout (NOT 3-equal-column grid)
+   [ ] Section spacing is py-32 or more
+   [ ] Floating/glass-morphism navigation present
+
+   **Visual Depth (pass 4 of 5)**
+   [ ] Hero has layered background (gradient + pattern + particles/decoration)
+   [ ] Grain/noise texture present on gradient sections
+   [ ] Card hover spotlight/glow effect works
+   [ ] Parallax or scroll-reveal effect on at least 1 section
+   [ ] Background decoration elements present (blobs, beams, dots, meteors)
+
+   **Animation (pass 3 of 4)**
+   [ ] Hero headline has text animation (generate, typing, or blur-in)
+   [ ] Feature cards have scroll entrance animation (translate+fade, NOT fade-only)
+   [ ] Stats have count-up animation
+   [ ] At least 1 ambient animation present (particles, aurora, floating shapes, marquee)
+
+   **Differentiation (ALL must pass)**
+   [ ] All 3 prototypes use different Hero techniques
+   [ ] All 3 prototypes use different Feature layouts
+   [ ] No shared background patterns between prototypes
+   [ ] Color palettes are clearly distinct (different hue families)
+   ```
+
+   **If more than 2 items fail**: trigger targeted fix round — edit code to address specific failures, re-screenshot, re-evaluate. Max 2 fix iterations.
+
+6. **Fix discovered issues in the code**:
+   - Fix listed issues in priority order (scorecard failures first, then visual issues)
    - After fixing, re-screenshot the affected page → re-analyze with Read
    - Max 2 iterations (total screenshots: initial + up to 2 fix rounds)
 
-5. **Compare reference screenshots in `prototypes/references/` with current prototype screenshots**:
-   - If there are clearly lacking visual elements compared to references, apply additional fixes
+7. **Compare reference screenshots in `prototypes/references/` with current prototype screenshots**:
+   - If there are clearly lacking visual elements compared to Stripe/Vercel/Linear references, apply additional fixes
 
-> **CHECKPOINT**: Verify all screenshots display proper UI, 3 prototypes are visually differentiated, and visual analysis reveals no critical issues.
+> **CHECKPOINT**: Verify all screenshots display proper UI, Premium Quality Scorecard passes for all 3 prototypes (max 2 failures allowed), 3 prototypes are visually AND structurally differentiated, and visual analysis reveals no critical issues.
 
 ---
 
@@ -468,7 +752,7 @@ Design reference: {research.md landing page patterns section content} — modern
    Please review and choose."
 
 2. Summarize all 3 prototypes in a table:
-   | Prototype | Entry URL | Concept | Palette | Page Structure | Pros | Cons |
+   | Prototype | Entry URL | Concept | Palette | Hero Technique | Feature Layout | Page Structure | Pros | Cons |
    Ask the user to choose, then after selection:
    - Stop the dev server
    - "Selection complete. Next step: run /setup-versions {a|b|c}"
@@ -476,30 +760,34 @@ Design reference: {research.md landing page patterns section content} — modern
 Final directory structure:
 ```
 prototypes/
-├── research.md               ← Phase 1 (with 3 palettes + landing page patterns)
-├── concepts.md               ← Phase 2 (concepts + landing structure + animation direction)
+├── research.md               ← Phase 1 (3 palettes + landing patterns + §7 Premium Mapping + §8 Anti-Patterns)
+├── concepts.md               ← Phase 2 (concepts + field 10 Premium Component Selection)
 ├── references/
 │   ├── ref-{app1}.png
 │   ├── ref-{app2}.png
+│   ├── ref-{stripe}.png       ← Premium reference
 │   └── ref-{landing-ref}.png  ← Landing reference screenshot
 ├── _app/
 │   ├── app/
+│   │   ├── globals.css        ← Includes premium utility CSS (aurora, grain, grid, marquee, shimmer)
 │   │   ├── layout.tsx
 │   │   ├── page.tsx          ← Simple index with /a, /b, /c links only
 │   │   ├── a/
-│   │   │   ├── page.tsx        ← Landing page (Hero + CTA → /a/app)
-│   │   │   ├── app/page.tsx    ← App feature page
+│   │   │   ├── page.tsx        ← Landing page (Premium Hero + CTA → /a/app)
+│   │   │   ├── app/page.tsx    ← App feature page (glass-morphism + spotlight cards)
 │   │   │   └── {route}/page.tsx
 │   │   ├── b/
-│   │   │   ├── page.tsx        ← Landing page
+│   │   │   ├── page.tsx        ← Landing page (different Hero technique)
 │   │   │   ├── app/page.tsx
 │   │   │   └── {route}/page.tsx
 │   │   └── c/
-│   │       ├── page.tsx        ← Landing page
+│   │       ├── page.tsx        ← Landing page (different Hero technique)
 │   │       ├── app/page.tsx
 │   │       └── {route}/page.tsx
-│   ├── components/ui/
-│   └── lib/utils.ts
+│   ├── components/
+│   │   ├── ui/               ← shadcn/ui components
+│   │   └── premium/          ← Aceternity/Magic UI component code (fallback)
+│   └── lib/utils.ts          ← cn() + generateNoisePattern()
 └── interface-{a,b,c}/
     └── README.md
 ```

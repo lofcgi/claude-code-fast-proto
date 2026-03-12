@@ -53,7 +53,7 @@
     },
     "unsplash": {
       "command": "npx",
-      "args": ["-y", "@jeff_kit/unsplash-mcp-server"],
+      "args": ["-y", "@microlee666/unsplash-mcp-server"],
       "env": {
         "UNSPLASH_ACCESS_KEY": "${UNSPLASH_ACCESS_KEY}"
       }
