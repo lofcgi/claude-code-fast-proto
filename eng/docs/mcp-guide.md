@@ -9,8 +9,8 @@ They auto-load when you run `cd eng && claude`. Servers without API keys will si
 
 | MCP Server | Purpose | Skill Integration |
 |------------|---------|-------------------|
-| **Sequential Thinking** | Step-by-step PRD analysis, complex problem decomposition | `/analyze` |
-| **Playwright** | Automated browser testing, screenshot capture | `/evaluate` |
+| **Sequential Thinking** | Step-by-step PRD analysis, complex problem decomposition | `/prototype` |
+| **Playwright** | Automated browser testing, screenshot capture | `/implement` |
 | **v0** | AI prototype code generation (Vercel) | `/prototype` |
 
 ### OAuth (Browser Login)
@@ -24,7 +24,7 @@ They auto-load when you run `cd eng && claude`. Servers without API keys will si
 | MCP Server | Required Key | Where to Get It | Skill Integration |
 |------------|-------------|-----------------|-------------------|
 | **Context7** | `CONTEXT7_API_KEY` | [context7.com](https://context7.com) (free) | All implementation skills |
-| **Firecrawl** | `FIRECRAWL_API_KEY` | [firecrawl.dev](https://firecrawl.dev) | `/analyze` research |
+| **Firecrawl** | `FIRECRAWL_API_KEY` | [firecrawl.dev](https://firecrawl.dev) | `/prototype` research |
 | **GitHub** | `GITHUB_TOKEN` | GitHub PAT (Personal Access Token) | Branch/PR management |
 | **21st-dev Magic** | `TWENTY_FIRST_API_KEY` | [21st.dev/magic/console](https://21st.dev/magic/console) (beta, free) | `/prototype` UI components |
 
@@ -82,22 +82,16 @@ OAuth-based — a browser login window will appear on first use. No separate key
 ## Pipeline MCP Usage Flow
 
 ```
-/analyze
-  ├── Sequential Thinking → Step-by-step PRD analysis
-  ├── Firecrawl → Competitor/technology research
-  └── Context7 → Latest documentation reference
-
 /prototype
+  ├── Sequential Thinking → Step-by-step PRD analysis
   ├── Design Inspiration → Dribbble/Behance/Awwwards reference search
   ├── 21st-dev Magic → UI component inspiration + generation
   ├── v0 → AI prototype code generation
   ├── Firecrawl → Competitor app UI reference crawling
   └── Context7 → Latest framework docs
 
-/implement (each version)
-  └── Context7 → Latest library API reference
-
-/evaluate
+/implement
+  ├── Context7 → Latest library API reference
   └── Playwright → Automated browser testing + screenshots
 
 /ship

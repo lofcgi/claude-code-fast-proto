@@ -8,6 +8,7 @@ dist/
 *.db
 .DS_Store
 .mcp.json
+.playwright-mcp/
 */input/*.pdf
 tools/design-inspiration-mcp/node_modules/
 tools/design-inspiration-mcp/dist/

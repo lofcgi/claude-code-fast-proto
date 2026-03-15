@@ -16,7 +16,7 @@ Analyze the project and generate promotional content for the $ARGUMENTS platform
 ## Content Structure
 
 ### Required Stories
-- Experience implementing Best-of-3 parallel builds with AI agents
+- Experience automating prototype → implement → deploy with AI agents
 - Pipeline design process
 - Actual deliverable demo/screenshot guide
 - Agent usage statistics (commit count, session count, etc.)
@@ -30,7 +30,7 @@ Analyze the project and generate promotional content for the $ARGUMENTS platform
 ## Reference Files
 - DEVLOG.md: Development journey
 - analysis/prd.md: Project requirements
-- evaluation/comparison.md: Best-of-3 results
+- analysis/requirements.json: Requirements analysis
 - project/README.md: Final project description
 
 Save result to docs/promotion/$ARGUMENTS.md

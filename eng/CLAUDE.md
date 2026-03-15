@@ -1,33 +1,27 @@
 # AI Agent Pipeline
 
-This project is a pipeline where AI agents implement full-stack apps
-in parallel using Best-of-3 from PRD/PDF input.
+This project is a pipeline where AI agents perform
+prototype → implement → deploy from URL + PRD input.
 
 ## Usage
-1. Put PDF/PRD in input/
-2. /analyze → /prototype → /setup-versions
-3. Run /implement in 3 separate terminals
-4. /evaluate → /select-winner
-5. In project/: /polish → /ship
+1. Put URL + description in input/
+2. /prototype → compare prototypes a/b
+3. /implement a (or b) → auto-chains build-check + self-review + iterate
+4. /ship → env vars setup + deploy
 
 ## Directory Structure
-- input/: Original PRD/PDF
+- input/: Original URL/PRD/PDF
 - analysis/: Parsed requirements
-- prototypes/: 3 UI prototypes
-- versions/: 3 parallel implementation versions
-- evaluation/: Evaluation results
-- project/: Final selected version
+- prototypes/: 2 UI prototypes (a, b)
+- project/: Implemented app
 
 ## Rules
 - Always reference analysis/ documents when running skills
 - Maintain Prettier formatting when modifying files
 - Use Conventional Commits format
 
-## Design System Rules
-- All colors: import from design-tokens.ts (no inline hex)
-- All premium components: import from components/premium/ (no page-level redefinition)
-- All sections: SectionWrapper or minimum 2-layer background
-- No Feature cards without images
-- Every section after Hero must have at least 1 visual element
-- Spring physics only (no linear)
-- Minimum 8 sections per page, minimum 5 images
+## Design Guidelines (reference, not enforced)
+- Colors via design-tokens.ts preferred
+- Consult prototype-references/ docs for visual density, aesthetics, copy, components
+- Spring physics preferred over linear easing
+- Feature pages with interactive mockups required in prototypes

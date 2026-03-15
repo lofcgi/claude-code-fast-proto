@@ -1,12 +1,8 @@
 # AI Agent Pipeline
 
-> Open-source Best-of-N parallel implementation pipeline powered by AI coding agents.
+> URL + PRD → AI agent performs prototype → implement → deploy.
 >
-> 오픈소스 Best-of-N 병렬 구현 파이프라인. AI 코딩 에이전트로 구동됩니다.
-
-Drop a PRD/PDF, run Claude Code skills, and get 3 competing full-stack implementations evaluated and merged into one polished product.
-
-PRD/PDF를 넣고 Claude Code 스킬을 실행하면, 3개의 경쟁 풀스택 구현체가 평가되어 하나의 완성된 프로덕트로 합쳐집니다.
+> URL + PRD를 넣으면 AI 에이전트가 프로토타입 → 구현 → 배포까지 수행합니다.
 
 ---
 
@@ -21,7 +17,7 @@ cd kor   # 한국어
 
 # Then start Claude Code
 claude
-/analyze
+/prototype
 ```
 
 > **Detailed guide / 상세 가이드:** [`eng/README.md`](./eng/README.md) (English) | [`kor/README.md`](./kor/README.md) (한국어)
@@ -40,32 +36,26 @@ Each folder is a **fully independent, self-contained pipeline**. You can delete 
 ## Pipeline Flow
 
 ```
-1. Put your PDF/PRD in input/     │  input/에 PDF/PRD 넣기
-2. /analyze                       │  PRD 파싱 + 구조화
-3. /prototype                     │  3가지 UI 프로토타입 생성
-4. /setup-versions                │  3개 버전 디렉토리 생성
-5. Open 3 terminals → /implement  │  터미널 3개에서 /implement
-6. /evaluate                      │  3개 버전 평가
-7. /select-winner                 │  최적 버전 선택
-8. /polish → /ship                │  다듬기 → 배포
+1. Put URL + description in input/    │  input/에 URL + 설명 넣기
+2. /prototype                         │  프로토타입 a/b 생성
+3. /implement a (or b)                │  project/에 풀스택 구현
+   └→ build-check → self-review       │  자동 Ralph Loop
+4. /ship                              │  환경변수 확인 + 배포
 ```
 
 ## Available Skills
 
 | Skill | Description | 설명 |
 |-------|-------------|------|
-| `/analyze` | Parse PRD/PDF → structured requirements | PRD/PDF 파싱 → 구조화된 요구사항 |
-| `/prototype` | Generate 3 UI prototypes | 3가지 UI 프로토타입 생성 |
-| `/setup-versions` | Create 3 parallel version dirs | 3개 병렬 버전 디렉토리 생성 |
-| `/evaluate` | Score all versions | 모든 버전 채점 |
-| `/select-winner` | Copy best version to project/ | 최적 버전을 project/로 복사 |
-| `/ship` | Deploy + generate docs | 배포 + 문서 생성 |
+| `/prototype` | Generate 2 UI prototypes from URL | URL 기반 프로토타입 2종 생성 |
+| `/implement <a\|b>` | Build full-stack app from prototype | 프로토타입 기반 풀스택 구현 |
+| `/ship` | Env var check + CLI deploy | 환경변수 확인 + 배포 |
 | `/promote <platform>` | Generate promo content | 홍보 콘텐츠 생성 |
 | `/devlog` | Auto-generate dev log | 개발 로그 자동 기록 |
 
 ## MCP Servers
 
-9 MCP servers included (Sequential Thinking, Playwright, v0, Context7, Firecrawl, Vercel, GitHub, 21st-dev Magic, Design Inspiration) — auto-loaded via `.mcp.json`. See [kor/docs/mcp-guide.md](kor/docs/mcp-guide.md) or [eng/docs/mcp-guide.md](eng/docs/mcp-guide.md) for details.
+MCP servers included (Sequential Thinking, Playwright, Context7, Firecrawl, GitHub, 21st-dev Magic, Design Inspiration, Unsplash) — auto-loaded via `.mcp.json`. See [kor/docs/mcp-guide.md](kor/docs/mcp-guide.md) or [eng/docs/mcp-guide.md](eng/docs/mcp-guide.md) for details.
 
 ## Prerequisites / 사전 요구사항
 
@@ -74,6 +64,12 @@ Each folder is a **fully independent, self-contained pipeline**. You can delete 
 - Git
 - Accounts (Google Cloud, Turso, Vercel) are needed later at `/implement` and `/ship` stages, not to start
 - 계정(Google Cloud, Turso, Vercel)은 `/implement`와 `/ship` 단계에서 필요하며, 시작할 때는 불필요합니다
+
+## Example / 사용 예시
+
+[`_example/`](./_example/) contains a real-world project built with this pipeline — an AI dubbing web service.
+
+[`_example/`](./_example/) 폴더에 이 파이프라인으로 만든 실제 프로젝트(AI 더빙 웹 서비스)가 포함되어 있습니다.
 
 ## License
 

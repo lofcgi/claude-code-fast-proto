@@ -1,0 +1,35 @@
+{
+  "project_name": "AI Dubbing Web Service",
+  "domain": {
+    "industry": "AI/SaaS",
+    "product_type": "B2C",
+    "keywords": ["AI 더빙", "음성 합성", "번역", "ElevenLabs", "음성 전사"],
+    "reference_companies": ["Perso AI", "ElevenLabs", "HeyGen", "Synthesia", "Rask AI"]
+  },
+  "tech_stack": {
+    "framework": "Next.js 15 (App Router)",
+    "db": "Turso (libSQL) + Drizzle ORM",
+    "auth": "Auth.js v5 + Google OAuth",
+    "ui": "shadcn/ui + Tailwind CSS",
+    "deploy": "Vercel",
+    "apis": ["ElevenLabs (STT + TTS)"]
+  },
+  "features": [
+    { "id": "FR-001", "title": "파일 업로드 (오디오/비디오)", "priority": "must" },
+    { "id": "FR-002", "title": "음성 추출 및 전사 (ElevenLabs STT)", "priority": "must" },
+    { "id": "FR-003", "title": "번역 (자유 선택)", "priority": "must" },
+    { "id": "FR-004", "title": "음성 합성 (ElevenLabs TTS)", "priority": "must" },
+    { "id": "FR-005", "title": "결과물 재생 및 다운로드", "priority": "must" },
+    { "id": "FR-006", "title": "타겟 언어 선택", "priority": "must" },
+    { "id": "FR-007", "title": "Google OAuth 로그인", "priority": "must" },
+    { "id": "FR-008", "title": "화이트리스트 기반 접근 제어", "priority": "must" },
+    { "id": "FR-009", "title": "처리 상태 표시 (단계별 프로그레스)", "priority": "should" },
+    { "id": "FR-010", "title": "더빙 히스토리", "priority": "could" }
+  ],
+  "constraints": [
+    { "type": "API", "description": "ElevenLabs 무료 티어 월간 사용량 제한", "impact": "더빙 횟수 제한 필요" },
+    { "type": "DB", "description": "Turso 무료 플랜 용량 제한", "impact": "히스토리 저장량 제한" },
+    { "type": "Auth", "description": "kts123@estsoft.com 반드시 화이트리스트 포함", "impact": "초기 데이터 시딩 필요" },
+    { "type": "Deploy", "description": "Vercel 무료 티어 서버리스 함수 실행 시간 제한", "impact": "대용량 파일 처리 시 타임아웃 가능" }
+  ]
+}

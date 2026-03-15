@@ -62,13 +62,10 @@
       "command": "npx",
       "args": ["-y", "collectui-mcp"]
     },
-    "defuddle-fetch": {
+    "reactbits": {
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "defuddle-fetch-mcp-server"]
-    },
-    "lighthouse-mcp": {
-      "command": "npx",
-      "args": ["-y", "@nicksavage/lighthouse-mcp"]
+      "args": ["-y", "@ceorkm/reactbits-mcp-server"]
     }
   }
 }

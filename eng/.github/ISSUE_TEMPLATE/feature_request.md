@@ -17,12 +17,9 @@ Other approaches you've thought about.
 
 ## Pipeline Impact
 Which stages of the pipeline would this affect?
-- [ ] /analyze
 - [ ] /prototype
-- [ ] /setup-versions
 - [ ] /implement
-- [ ] /evaluate
-- [ ] /select-winner
 - [ ] /ship
 - [ ] /promote
+- [ ] /devlog
 - [ ] New skill needed

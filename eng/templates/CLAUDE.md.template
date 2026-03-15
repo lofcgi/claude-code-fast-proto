@@ -1,40 +1,19 @@
-# {{PROJECT_NAME}} — Version {{VERSION_NUMBER}}
+# {{PROJECT_NAME}}
 
 ## Project
 {{PROJECT_DESCRIPTION}}
 
 ## Tech Stack
-<!-- {{TECH_STACK}} renders tech_stack from requirements.json as a markdown bullet list:
-- Framework: Next.js 15 (App Router)
-- DB: Turso + Drizzle ORM
-- Auth: Auth.js v5 + Google OAuth
-- UI: shadcn/ui + Tailwind CSS
-- Deploy: Vercel
--->
 {{TECH_STACK}}
 
-### Default Stack (used when not specified in PRD)
-- **Framework**: Next.js 15 (App Router, TypeScript, Tailwind CSS)
-- **Auth**: Auth.js v5 + Google OAuth
-- **DB**: Turso (libSQL) + Drizzle ORM
-- **UI**: shadcn/ui + Lucide Icons
-- **Deploy**: Vercel
-
 ## Reference Documents
-- ../../analysis/prd.md — Requirements
-- ../../analysis/requirements.json — Feature list
-- ../../analysis/acceptance-criteria.md — Acceptance criteria
-- prototype/ — UI prototype
+- ../analysis/prd.md — Requirements
+- ../analysis/requirements.json — Feature list
+- ../analysis/acceptance-criteria.md — Acceptance criteria
+- ../prototypes/{{PROTOTYPE_VARIANT}}/ — UI prototype
 
-## Environment Variables (.env.local)
-```
-AUTH_SECRET=          # npx auth secret
-AUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=     # Google Cloud Console
-GOOGLE_CLIENT_SECRET=
-TURSO_DATABASE_URL=   # Turso dashboard
-TURSO_AUTH_TOKEN=
-```
+## Environment Variables
+- `/implement` Phase 0 auto-detects required env vars based on requirements.json
 - NEVER commit `.env.local`
 - Commit `.env.example` with keys only
 

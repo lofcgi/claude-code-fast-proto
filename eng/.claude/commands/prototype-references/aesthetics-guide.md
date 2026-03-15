@@ -3,6 +3,11 @@
 Based on the Anthropic official Frontend Aesthetics guide.
 Without explicit guidance, Claude converges toward "AI slop" aesthetics, so these rules must be explicitly followed.
 
+> **Override principle**: All rules in this guide are **AI slop prevention defaults**.
+> If the reference clearly uses a different style, follow the reference.
+> Example: reference intentionally uses Inter font → Inter is allowed.
+> Example: reference uses light background + minimal → ignore dark theme rules.
+
 ---
 
 ## Typography

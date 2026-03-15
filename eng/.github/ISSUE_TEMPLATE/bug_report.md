@@ -26,14 +26,11 @@ What actually happened.
 
 ## Pipeline Stage
 Which skill was running when the bug occurred?
-- [ ] /analyze
 - [ ] /prototype
-- [ ] /setup-versions
 - [ ] /implement
-- [ ] /evaluate
-- [ ] /select-winner
 - [ ] /ship
 - [ ] /promote
+- [ ] /devlog
 
 ## Additional Context
 Any logs, screenshots, or other relevant information.
