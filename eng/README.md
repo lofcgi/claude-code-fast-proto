@@ -1,10 +1,78 @@
 # AI Agent Pipeline
 
-> URL + PRD in → AI agent performs prototype → implement → deploy.
+> Your AI agent reads a URL, clones the design, builds the app, and deploys it.
 
-## Why This Exists
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-CLI-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
+[![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
 
-Applying a Ralph Loop (build-check → self-review → iterate) to AI coding agents produces high-quality results without separate polish stages or parallel sampling. This template turns that concept into a real pipeline: **one URL in, two prototypes out, chosen one becomes a full-stack app.**
+---
+
+## How It Works — Agent Orchestration
+
+### The Big Picture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  input/url.md  ──→  /prototype  ──→  /implement  ──→  /ship │
+│                                                              │
+│  Phase 1: Explore & Plan                                     │
+│    Firecrawl scrape → Vision analysis → branding extraction  │
+│    → plan.md + analysis/ (PRD, requirements, criteria)       │
+│                                                              │
+│  Phase 2: Generate                                           │
+│    Section-by-section cloning → 21st-dev components          │
+│    → Unsplash images → prototypes/a + prototypes/b           │
+│                                                              │
+│  Phase 3: Verify                                             │
+│    Playwright screenshot → Vision diff → fix loop (max 3)    │
+│                                                              │
+│  /clear  (reset context window)                              │
+│                                                              │
+│  Phase 4: Implement                                          │
+│    Prototype → full-stack app → Ralph Loop                   │
+│    (build → type-check → self-review → fix, max 3 rounds)   │
+│                                                              │
+│  Phase 5: Ship                                               │
+│    Env var validation → CLI deploy                           │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### What the Agent Does at Each Step
+
+**`/prototype`** — The agent:
+1. Scrapes the reference URL with Firecrawl to extract content, layout, and branding
+2. Captures screenshots and analyzes them with Vision to understand visual structure
+3. Searches Dribbble/Behance/Awwwards for design inspiration
+4. Sources real images from Unsplash (avatars, heroes, backgrounds)
+5. Generates 2 complete UI prototypes by cloning the reference section-by-section
+6. Takes screenshots of its own prototypes and compares them to the reference (diff loop, max 3 rounds)
+
+**`/implement a`** (or `b`) — The agent:
+1. Reads `analysis/` and the chosen prototype to understand requirements
+2. Converts the static prototype into a full-stack app (API routes, database, auth)
+3. Runs the Ralph Loop: build → type-check → lint → self-review → fix (max 3 rounds)
+4. Outputs a production-ready app in `project/`
+
+**`/ship`** — The agent:
+1. Checks all required environment variables
+2. Guides you through any missing credentials
+3. Deploys via Vercel CLI
+
+### Ralph Loop: Self-Improving Code Generation
+
+```
+build → type-check → lint ──→ pass? ──→ self-review ──→ done
+                              │                          │
+                              fail                      issues found
+                              │                          │
+                              └──→ fix + rebuild ←───────┘
+                                   (max 3 rounds)
+```
+
+The agent doesn't just generate code — it **validates and fixes its own output** autonomously.
+
+---
 
 ## Before You Begin
 
@@ -21,10 +89,32 @@ node -v   # Should print v18.x or higher
 git --version
 ```
 
+### MCP Servers — Your Agent's Toolbox
+
+MCP servers are pre-configured in `.mcp.json` and auto-load when you run `cd eng && claude`.
+Servers without API keys simply deactivate — they don't block the pipeline.
+
+| MCP Server | What the Agent Does With It | Setup |
+|------------|---------------------------|-------|
+| **Firecrawl** | Scrapes reference URL for content + branding | API key ([firecrawl.dev](https://firecrawl.dev)) |
+| **Playwright** | Screenshots, visual diff, browser testing | Zero config |
+| **21st-dev Magic** | Sources production UI components | API key ([21st.dev](https://21st.dev/magic/console), free) |
+| **Design Inspiration** | Searches design reference sites | API key ([serper.dev](https://serper.dev)) |
+| **Unsplash** | Sources real images for prototypes | API key ([unsplash.com](https://unsplash.com/developers)) |
+| **Context7** | Looks up latest framework docs | Zero config |
+| **Sequential Thinking** | Structured multi-step analysis | Zero config |
+| **GitHub** | Branch/PR management | PAT |
+| **Vercel** | Deployment via MCP | OAuth (browser login) |
+| **v0** | AI prototype code generation | Zero config |
+| **Defuddle Fetch** | Clean web content extraction | Zero config |
+| **Lighthouse** | Performance auditing | Zero config |
+
+Full setup guide: [docs/mcp-guide.md](docs/mcp-guide.md)
+
 <details>
 <summary><strong>Accounts needed later (not required to start)</strong></summary>
 
-These accounts are only needed at the `/implement` and `/ship` stages — you can start the pipeline without them:
+These accounts are only needed at the `/implement` and `/ship` stages:
 
 | Account | Environment Variables | When Needed |
 |---------|----------------------|-------------|
@@ -34,57 +124,143 @@ These accounts are only needed at the `/implement` and `/ship` stages — you ca
 
 </details>
 
-<details>
-<summary><strong>MCP server setup (optional, improves prototype quality)</strong></summary>
+---
 
-| MCP Server | Setup | Notes |
-|------------|-------|-------|
-| 21st-dev Magic | Get API key at [21st.dev/magic/console](https://21st.dev/magic/console) | Beta, free |
-| Design Inspiration | [Serper API key](https://serper.dev) | Design reference search (npx, auto-configured) |
-| Firecrawl | [firecrawl.dev](https://firecrawl.dev) API key | URL scraping + branding extraction |
-| GitHub | GitHub PAT | Branch/PR management via MCP |
+## Quick Start
 
-</details>
+```bash
+git clone <repo-url> && cd ai-agent-pipeline/eng
 
-## What Goes in input/
+# 1. Add your reference URL
+echo "https://example.com" > input/url.md
 
-Place a **reference URL** and optionally a **PRD/PDF** in the `input/` folder.
+# 2. Start Claude Code
+claude
 
-- `input/url.md` — one URL per line (first = main reference)
-- `input/*.pdf` or `input/prd.md` — project description (optional)
-
-> **Default tech stack** (when not specified in PRD): Next.js 15, Auth.js v5, Turso (SQLite), shadcn/ui, Tailwind CSS, Vercel
-
-## Pipeline Flow
-
-> **Total time: ~1 hour** depending on PRD complexity
-
+# 3. Run the pipeline
+/prototype          # Generates analysis/ + prototypes/a, prototypes/b
+# Pick your favorite, then:
+/implement a        # Builds full-stack app in project/ (auto Ralph Loop)
+/ship               # Env var check + deploy
 ```
-1. git clone ai-agent-pipeline && cd ai-agent-pipeline/eng
-2. Put URL + description in input/
-3. claude                          # Start Claude Code
-4. /prototype                      # Generate prototypes a/b + analysis/
-5. Pick your favorite prototype
-6. /implement a (or b)             # Build full-stack app in project/
-   └→ build-check → self-review → iterate (auto-chain, max 3 rounds)
-7. /ship                           # Env var check + CLI deploy
-8. /promote devto                  # Generate promo content (optional)
+
+> **Total time: ~1 hour** depending on project complexity.
+
+---
+
+## Pipeline Deep Dive
+
+### Phase 1: Explore & Plan (`/prototype`)
+
+The agent's first actions:
+1. Reads `input/url.md` for the reference URL
+2. **Firecrawl scrape** — extracts page content, navigation structure, copy
+3. **Playwright visit** — captures full-page screenshots
+4. **Vision analysis** — identifies layout patterns, color palette, typography
+5. **Design Inspiration search** — finds similar designs on Dribbble/Behance/Awwwards
+6. **Sequential Thinking** — breaks down the reference into a structured plan
+
+**Output:** `analysis/prd.md`, `analysis/requirements.json`, `analysis/acceptance-criteria.md`
+
+### Phase 2: Generate (`/prototype` continued)
+
+The agent builds two prototypes:
+1. **Section-by-section cloning** — each section of the reference is replicated individually
+2. **21st-dev components** — sources production-quality UI building blocks
+3. **Unsplash images** — replaces placeholders with real, relevant images
+4. **Framer Motion** — adds appropriate animations (spring physics preferred)
+
+**Output:** `prototypes/a/`, `prototypes/b/`
+
+### Phase 3: Verify (`/prototype` continued)
+
+The agent validates its own work:
+1. **Playwright screenshot** — captures the generated prototype
+2. **Vision comparison** — compares prototype screenshot to reference screenshot
+3. **Diff loop** — identifies discrepancies and fixes them (max 3 rounds)
+
+### Phase 4: Implement (`/implement`)
+
+After you pick a prototype and run `/clear`:
+1. Reads `analysis/` documents and the chosen prototype
+2. Converts static UI to full-stack: API routes, database schema, auth flows
+3. **Ralph Loop** — build → type-check → lint → self-review → fix (max 3 rounds)
+4. Uses **Context7** to look up latest API docs for frameworks
+
+**Output:** `project/` — production-ready full-stack app
+
+### Phase 5: Ship (`/ship`)
+
+1. Validates all required environment variables
+2. Guides through missing credentials
+3. Deploys via Vercel CLI
+
+---
+
+## Customizing the Agent
+
+### Adding Your Own Skills
+
+Create a markdown file in `.claude/commands/`:
+
+```markdown
+---
+description: What this skill does (shown in /help)
+---
+
+Your prompt engineering here. The agent follows these instructions
+when the user runs /your-skill-name.
 ```
+
+The filename becomes the slash command: `my-skill.md` → `/my-skill`.
+
+### Modifying Existing Skills
+
+The `prototype.md` file (349 lines) controls the entire prototype generation. Key sections:
+
+| Section | What It Controls |
+|---------|-----------------|
+| Phase 1: Explore | URL analysis, branding extraction, MCP tool usage |
+| Phase 2: Generate | Section cloning strategy, component sourcing, image mapping |
+| Phase 3: Verify | Screenshot comparison, diff loop iterations |
+| Quality gates | What standards the agent enforces |
+
+### Adding MCP Servers
+
+Edit `.mcp.json` to add new servers:
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "npx",
+      "args": ["-y", "your-mcp-package"]
+    }
+  }
+}
+```
+
+Then reference the server in your skill's `allowed-tools` frontmatter.
+
+---
 
 ## Directory Structure
 
 ```
 eng/
-├── input/              # Put URL + PRD/PDF here
+├── input/              # Your URL + PRD/PDF goes here
 ├── analysis/           # Auto-generated by /prototype
 ├── prototypes/         # Auto-generated by /prototype (a/, b/)
-├── templates/          # Templates for project/ directory (pre-existing)
+├── templates/          # Starter templates for project/
 ├── project/            # Auto-generated by /implement
-└── .claude/commands/   # Pipeline orchestration skills (pre-existing)
+├── .claude/commands/   # Agent skill prompts (the "programs")
+├── .mcp.json           # MCP server configuration
+└── docs/
+    └── mcp-guide.md    # Detailed MCP setup guide
 ```
 
 <details>
-<summary><strong>Files generated at each stage (click to expand)</strong></summary>
+<summary><strong>Files generated at each stage</strong></summary>
 
 | Stage | Generated Files |
 |-------|----------------|
@@ -94,51 +270,19 @@ eng/
 
 </details>
 
-## Available Skills
-
-| Skill | Description |
-|-------|-------------|
-| `/prototype` | Generate 2 UI prototypes from URL + analysis/ |
-| `/implement <a\|b>` | Build full-stack app from chosen prototype (auto Ralph Loop) |
-| `/ship` | Env var check + CLI deploy |
-| `/promote <platform>` | Generate promotional content (velog, devto, reddit, twitter, geek, hn) |
-| `/devlog` | Auto-generate development log entry |
-
-## MCP Servers
-
-MCP servers are included in `.mcp.json` and auto-load when you run `cd eng && claude`.
-
-| MCP Server | Purpose | Setup |
-|------------|---------|-------|
-| Sequential Thinking | Structured analysis | Zero config |
-| Playwright | Automated browser testing | Zero config |
-| Context7 | Latest docs reference | API key (free) |
-| Firecrawl | URL scraping + branding extraction | API key |
-| GitHub | Branch/PR management | PAT |
-| 21st-dev Magic | UI component inspiration + generation | API key (21st.dev, beta free) |
-| Design Inspiration | Dribbble/Behance/Awwwards reference search | API key (Serper) |
-| Unsplash | Image sourcing | API key |
-
-API key setup and details: [docs/mcp-guide.md](docs/mcp-guide.md)
-
-## How It Works
-
-1. **Prototype**: Analyze URL with Firecrawl, extract branding/layout, generate 2 UI prototypes
-2. **Implement**: Build full-stack app in project/ based on chosen prototype
-3. **Ralph Loop**: Auto-iterate build-check → self-review → iterate up to 3 rounds for quality
-4. **Ship**: Collect env vars and deploy via CLI
+---
 
 ## Troubleshooting
 
 <details>
-<summary><strong>Common issues and solutions (click to expand)</strong></summary>
+<summary><strong>Common issues and solutions</strong></summary>
 
 | Problem | Solution |
 |---------|----------|
 | "Please add url.md to input/" | Add reference URLs to `input/url.md` |
 | MCP connection failed | Make sure you ran `claude` from inside `eng/` — see [docs/mcp-guide.md](docs/mcp-guide.md) |
-| `/implement` fails with missing env vars | Create accounts and set environment variables — see "Before You Begin" above |
-| `npm run build` fails | Ralph Loop automatically attempts fixes |
+| `/implement` fails with missing env vars | Create accounts and set environment variables — see "Before You Begin" |
+| `npm run build` fails | Ralph Loop automatically attempts fixes (max 3 rounds) |
 | Port conflict (address in use) | `lsof -ti:3000 \| xargs kill` to free the port |
 | Vercel deploy fails | Run `npx vercel login` first |
 

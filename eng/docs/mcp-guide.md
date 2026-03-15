@@ -1,38 +1,59 @@
-# MCP Server Guide
+# MCP Server Guide — Agent Tools
 
-This pipeline includes 9 MCP servers in `.mcp.json`.
-They auto-load when you run `cd eng && claude`. Servers without API keys will simply deactivate without affecting others.
+This pipeline equips the AI agent with MCP servers as its toolbox.
+They auto-load when you run `cd eng && claude`. Servers without API keys simply deactivate without affecting others.
 
-## Included MCP Servers (9)
+## How the Agent Uses MCP Servers
+
+```
+/prototype
+  ├── Firecrawl        → Scrape reference URL for content + branding
+  ├── Playwright       → Capture screenshots for Vision analysis + diff loop
+  ├── Design Inspiration → Search Dribbble/Behance/Awwwards for references
+  ├── 21st-dev Magic   → Source production-quality UI components
+  ├── Unsplash         → Source real images (avatars, heroes, backgrounds)
+  ├── Sequential Thinking → Break down PRD into structured analysis
+  ├── Defuddle Fetch   → Extract clean content from web pages
+  └── Context7         → Look up latest framework docs
+
+/implement
+  ├── Context7         → Look up latest library API docs
+  ├── Playwright       → Browser testing + screenshots
+  └── Lighthouse       → Performance auditing
+
+/ship
+  ├── Vercel           → Deploy via MCP
+  └── GitHub           → Create branches and PRs
+```
+
+## Included MCP Servers
 
 ### Zero Config (No API Key Needed)
 
-| MCP Server | Purpose | Skill Integration |
-|------------|---------|-------------------|
-| **Sequential Thinking** | Step-by-step PRD analysis, complex problem decomposition | `/prototype` |
-| **Playwright** | Automated browser testing, screenshot capture | `/implement` |
-| **v0** | AI prototype code generation (Vercel) | `/prototype` |
+| MCP Server | What the Agent Does With It | Used In |
+|------------|---------------------------|---------|
+| **Sequential Thinking** | Breaks down complex problems into structured, step-by-step analysis | `/prototype` |
+| **Playwright** | Captures screenshots for visual comparison, runs browser tests, executes diff loops | `/prototype`, `/implement` |
+| **v0** | Generates AI prototype code (Vercel) | `/prototype` |
+| **Context7** | Looks up latest framework and library documentation | All skills |
+| **Defuddle Fetch** | Extracts clean, readable content from web pages | `/prototype` |
+| **Lighthouse** | Runs performance audits on built applications | `/implement` |
 
 ### OAuth (Browser Login)
 
-| MCP Server | Purpose | Skill Integration |
-|------------|---------|-------------------|
-| **Vercel** | Deploy via MCP | `/ship` |
+| MCP Server | What the Agent Does With It | Used In |
+|------------|---------------------------|---------|
+| **Vercel** | Deploys the finished application | `/ship` |
 
 ### API Key Required
 
-| MCP Server | Required Key | Where to Get It | Skill Integration |
-|------------|-------------|-----------------|-------------------|
-| **Context7** | `CONTEXT7_API_KEY` | [context7.com](https://context7.com) (free) | All implementation skills |
-| **Firecrawl** | `FIRECRAWL_API_KEY` | [firecrawl.dev](https://firecrawl.dev) | `/prototype` research |
-| **GitHub** | `GITHUB_TOKEN` | GitHub PAT (Personal Access Token) | Branch/PR management |
-| **21st-dev Magic** | `TWENTY_FIRST_API_KEY` | [21st.dev/magic/console](https://21st.dev/magic/console) (beta, free) | `/prototype` UI components |
-
-### API Key Required (continued)
-
-| MCP Server | Required Key | Where to Get It | Skill Integration |
-|------------|-------------|-----------------|-------------------|
-| **Design Inspiration** | `SERPER_API_KEY` | [serper.dev](https://serper.dev) | `/prototype` design references |
+| MCP Server | Required Key | Where to Get It | What the Agent Does With It |
+|------------|-------------|-----------------|---------------------------|
+| **Firecrawl** | `FIRECRAWL_API_KEY` | [firecrawl.dev](https://firecrawl.dev) | Scrapes reference URL to extract content, layout structure, and branding elements |
+| **GitHub** | `GITHUB_TOKEN` | [GitHub PAT](https://github.com/settings/tokens) | Creates branches, manages pull requests |
+| **21st-dev Magic** | `TWENTY_FIRST_API_KEY` | [21st.dev/magic/console](https://21st.dev/magic/console) (beta, free) | Sources production-quality UI components for prototypes |
+| **Design Inspiration** | `SERPER_API_KEY` | [serper.dev](https://serper.dev) | Searches Dribbble/Behance/Awwwards for design references |
+| **Unsplash** | `UNSPLASH_ACCESS_KEY` | [unsplash.com/developers](https://unsplash.com/developers) | Sources real images — avatars, hero images, backgrounds — to replace placeholders |
 
 ## Setting Up API Keys
 
@@ -45,6 +66,7 @@ export FIRECRAWL_API_KEY="your-key-here"
 export GITHUB_TOKEN="your-pat-here"
 export SERPER_API_KEY="your-key-here"
 export TWENTY_FIRST_API_KEY="your-key-here"
+export UNSPLASH_ACCESS_KEY="your-key-here"
 ```
 
 ### 2. Via Claude Code Config
@@ -53,52 +75,76 @@ export TWENTY_FIRST_API_KEY="your-key-here"
 claude config set env FIRECRAWL_API_KEY "your-key-here"
 ```
 
-### 3. Context7
+### Detailed Setup
 
-Context7 can work without a separate API key. If needed, get a free key at [context7.com](https://context7.com) and set it as an environment variable.
+<details>
+<summary><strong>Context7</strong></summary>
 
-### 4. GitHub Token
+Works without a separate API key via npx. If needed, get a free key at [context7.com](https://context7.com) and set it as an environment variable.
+
+</details>
+
+<details>
+<summary><strong>GitHub Token</strong></summary>
 
 1. Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
 2. Select `repo` scope
 3. Set as environment variable: `export GITHUB_TOKEN="ghp_..."`
 
-### 5. Vercel
+</details>
 
-OAuth-based — a browser login window will appear on first use. No separate key setup needed.
+<details>
+<summary><strong>Vercel</strong></summary>
 
-### 6. 21st-dev Magic
+OAuth-based — a browser login window appears on first use. No separate key setup needed.
+
+</details>
+
+<details>
+<summary><strong>21st-dev Magic</strong></summary>
 
 1. Go to [21st.dev/magic/console](https://21st.dev/magic/console)
 2. Sign up and get your API key (beta, free)
 3. Set as environment variable: `export TWENTY_FIRST_API_KEY="your-key-here"`
 
-### 7. Design Inspiration
+</details>
+
+<details>
+<summary><strong>Design Inspiration</strong></summary>
 
 1. Get a Serper API key at [serper.dev](https://serper.dev)
 2. Set as environment variable: `export SERPER_API_KEY="your-key-here"`
 3. The MCP server runs automatically via npx — no build step needed
 
-## Pipeline MCP Usage Flow
+</details>
 
+<details>
+<summary><strong>Unsplash</strong></summary>
+
+1. Create an app at [unsplash.com/developers](https://unsplash.com/developers)
+2. Copy your Access Key
+3. Set as environment variable: `export UNSPLASH_ACCESS_KEY="your-key-here"`
+
+</details>
+
+## Adding More MCP Servers
+
+Edit `.mcp.json` to add servers:
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "npx",
+      "args": ["-y", "your-mcp-package"],
+      "env": {
+        "YOUR_API_KEY": "${YOUR_API_KEY}"
+      }
+    }
+  }
+}
 ```
-/prototype
-  ├── Sequential Thinking → Step-by-step PRD analysis
-  ├── Design Inspiration → Dribbble/Behance/Awwwards reference search
-  ├── 21st-dev Magic → UI component inspiration + generation
-  ├── v0 → AI prototype code generation
-  ├── Firecrawl → Competitor app UI reference crawling
-  └── Context7 → Latest framework docs
 
-/implement
-  ├── Context7 → Latest library API reference
-  └── Playwright → Automated browser testing + screenshots
+Then add `"mcp:your-server:*"` to the `allowed-tools` list in the relevant `.claude/commands/*.md` skill file.
 
-/ship
-  ├── Vercel MCP → Deployment
-  └── GitHub MCP → PR creation
-```
-
-## Additional MCPs (Manual Install)
-
-Find more MCPs at the [MCP Server Directory](https://github.com/modelcontextprotocol/servers).
+Find more MCP servers at the [MCP Server Directory](https://github.com/modelcontextprotocol/servers).

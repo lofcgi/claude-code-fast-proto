@@ -1,75 +1,158 @@
 # AI Agent Pipeline
 
-> URL + PRD → AI agent performs prototype → implement → deploy.
+> **Claude Code slash commands that turn a URL into a deployed full-stack app.**
 >
-> URL + PRD를 넣으면 AI 에이전트가 프로토타입 → 구현 → 배포까지 수행합니다.
+> URL 하나를 넣으면 AI 에이전트가 분석 → 프로토타입 → 구현 → 배포까지 수행하는 Claude Code 슬래시 커맨드 파이프라인.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-CLI-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
+[![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
 
 ---
+
+## What This Does
+
+An AI agent orchestrated by Claude Code slash commands:
+
+1. **Analyzes** a reference URL — scrapes content, extracts branding, captures screenshots
+2. **Generates** 2 UI prototypes by cloning the reference design section-by-section
+3. **Implements** a full-stack app with an autonomous build → review → fix loop
+4. **Deploys** via CLI with environment variable validation
+
+Each slash command is a **350+ line prompt** that programs the agent's behavior — prompt engineering as code.
+
+## Agent Pipeline
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  input/url.md                                                │
+│    └→ /prototype ─── Firecrawl scrape + branding extract     │
+│         ├→ analysis/ (PRD, requirements, acceptance criteria) │
+│         └→ prototypes/a, prototypes/b                        │
+│              └→ /implement a ─── build → review → fix loop   │
+│                   └→ project/ (full-stack app)               │
+│                        └→ /ship ─── env vars + deploy        │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ## Quick Start
 
 ```bash
 git clone <repo-url> && cd ai-agent-pipeline
-
-# Choose your language / 언어를 선택하세요:
-cd eng   # English
-cd kor   # 한국어
-
-# Then start Claude Code
-claude
-/prototype
+cd eng          # or: cd kor (한국어)
+# Put your reference URL in input/url.md
+claude          # Start Claude Code
+/prototype      # Agent takes over
 ```
 
-> **Detailed guide / 상세 가이드:** [`eng/README.md`](./eng/README.md) (English) | [`kor/README.md`](./kor/README.md) (한국어)
+## How the Agent Works
 
-## Choose Your Language / 언어 선택
+### Slash Commands = Agent Skills
 
-| Language | Directory | Description |
-|----------|-----------|-------------|
-| English | [`eng/`](./eng/) | All skills, templates, and docs in English |
-| 한국어 | [`kor/`](./kor/) | 모든 스킬, 템플릿, 문서가 한국어 |
+Each `/command` is a markdown file in `.claude/commands/` that programs the agent with hundreds of lines of prompt engineering.
+
+| Skill | Agent Behavior | MCP Tools Used |
+|-------|---------------|----------------|
+| `/prototype` | Scrapes URL → extracts branding → generates 2 UI prototypes with section-by-section cloning | Firecrawl, Playwright, 21st-dev, Design Inspiration, Unsplash |
+| `/implement <a\|b>` | Converts prototype to full-stack app → Ralph Loop (build → review → fix, max 3 rounds) | Context7, Playwright |
+| `/ship` | Validates env vars → deploys via CLI | Vercel |
+| `/promote` | Generates promotional content for dev platforms | — |
+| `/devlog` | Auto-generates development log from git history | — |
+
+### MCP Servers = Agent Tools
+
+MCP servers give the agent capabilities beyond code generation:
+
+| MCP Server | What the Agent Does With It |
+|------------|---------------------------|
+| **Firecrawl** | Scrapes reference URL to extract content, layout, and branding |
+| **Playwright** | Captures screenshots, runs visual diff loops, tests the built app |
+| **21st-dev Magic** | Sources production-quality UI components |
+| **Design Inspiration** | Searches Dribbble/Behance/Awwwards for design references |
+| **Unsplash** | Sources real images (avatars, heroes, backgrounds) |
+| **Context7** | Looks up latest framework/library documentation |
+| **Sequential Thinking** | Breaks down complex analysis into structured steps |
+| **GitHub** | Manages branches and pull requests |
+| **Vercel** | Deploys the finished app |
+
+### Ralph Loop = Self-Improving Agent
+
+The agent autonomously iterates on its own code:
+
+```
+build → type-check → lint ──→ pass? ──→ self-review ──→ done
+                              │                          │
+                              fail                      issues found
+                              │                          │
+                              └──→ fix + rebuild ←───────┘
+                                   (max 3 rounds)
+```
+
+### Context Management
+
+- **`/clear` between phases** — resets the agent's context window between `/prototype` and `/implement`
+- **`plan.md` + `analysis/`** — file-based handoff between agent phases (the agent writes analysis, then reads it in the next phase)
+
+## Prompt Engineering as Code
+
+The `.claude/commands/*.md` files **are** the agent's program:
+
+```
+.claude/commands/
+├── prototype.md    # 349 lines — URL analysis, section cloning, visual diff
+├── implement.md    # Full-stack conversion + Ralph Loop orchestration
+├── ship.md         # Deployment checklist + env var validation
+├── promote.md      # Platform-specific content generation
+└── devlog.md       # Development log automation
+```
+
+Customize the pipeline by editing these files or adding your own slash commands.
+
+## Choose Language
+
+| Language | Directory | Guide |
+|----------|-----------|-------|
+| English | [`eng/`](./eng/) | [`eng/README.md`](./eng/README.md) |
+| 한국어 | [`kor/`](./kor/) | [`kor/README.md`](./kor/README.md) |
 
 Each folder is a **fully independent, self-contained pipeline**. You can delete the one you don't need.
 
-각 폴더는 **완전히 독립적인 파이프라인**입니다. 필요 없는 폴더는 삭제해도 됩니다.
+## Real-World Example
 
-## Pipeline Flow
+[`_example/`](./_example/) contains a real project built with this pipeline — an **AI dubbing web service** deployed at [project-nine-nu-52.vercel.app](https://project-nine-nu-52.vercel.app).
+
+<details>
+<summary><strong>Architecture & Pipeline Evolution</strong></summary>
+
+### Pipeline Evolution
+
+| Version | Architecture | Key Change |
+|---------|-------------|------------|
+| v1 | Monolithic single prompt | One giant command |
+| v2 | Modularized phases | Separate analyze/prototype/implement |
+| v3 | Reference-based cloning | Section-by-section design cloning |
+| v4 | URL input + 3-phase | Firecrawl integration, visual diff loop |
+| v5 | Analyze absorbed into prototype | Streamlined to 3 slash commands |
+
+### Directory Structure
 
 ```
-1. Put URL + description in input/    │  input/에 URL + 설명 넣기
-2. /prototype                         │  프로토타입 a/b 생성
-3. /implement a (or b)                │  project/에 풀스택 구현
-   └→ build-check → self-review       │  자동 Ralph Loop
-4. /ship                              │  환경변수 확인 + 배포
+ai-agent-pipeline/
+├── README.md                 # This file
+├── eng/                      # English pipeline (self-contained)
+│   ├── .claude/commands/     # Agent skill prompts
+│   ├── .mcp.json             # MCP server configuration
+│   ├── input/                # Your URL + PRD goes here
+│   ├── analysis/             # Generated: requirements, criteria
+│   ├── prototypes/           # Generated: a/, b/
+│   ├── project/              # Generated: full-stack app
+│   └── templates/            # Starter templates
+├── kor/                      # Korean pipeline (self-contained)
+│   └── (same structure)
+└── _example/                 # Real-world example project
 ```
 
-## Available Skills
-
-| Skill | Description | 설명 |
-|-------|-------------|------|
-| `/prototype` | Generate 2 UI prototypes from URL | URL 기반 프로토타입 2종 생성 |
-| `/implement <a\|b>` | Build full-stack app from prototype | 프로토타입 기반 풀스택 구현 |
-| `/ship` | Env var check + CLI deploy | 환경변수 확인 + 배포 |
-| `/promote <platform>` | Generate promo content | 홍보 콘텐츠 생성 |
-| `/devlog` | Auto-generate dev log | 개발 로그 자동 기록 |
-
-## MCP Servers
-
-MCP servers included (Sequential Thinking, Playwright, Context7, Firecrawl, GitHub, 21st-dev Magic, Design Inspiration, Unsplash) — auto-loaded via `.mcp.json`. See [kor/docs/mcp-guide.md](kor/docs/mcp-guide.md) or [eng/docs/mcp-guide.md](eng/docs/mcp-guide.md) for details.
-
-## Prerequisites / 사전 요구사항
-
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
-- Node.js 18+
-- Git
-- Accounts (Google Cloud, Turso, Vercel) are needed later at `/implement` and `/ship` stages, not to start
-- 계정(Google Cloud, Turso, Vercel)은 `/implement`와 `/ship` 단계에서 필요하며, 시작할 때는 불필요합니다
-
-## Example / 사용 예시
-
-[`_example/`](./_example/) contains a real-world project built with this pipeline — an AI dubbing web service.
-
-[`_example/`](./_example/) 폴더에 이 파이프라인으로 만든 실제 프로젝트(AI 더빙 웹 서비스)가 포함되어 있습니다.
+</details>
 
 ## License
 
