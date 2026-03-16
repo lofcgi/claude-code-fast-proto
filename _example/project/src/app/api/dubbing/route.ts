@@ -3,7 +3,7 @@
 // Streams NDJSON progress events to the client
 
 import { NextRequest, NextResponse } from "next/server";
-import { del } from "@vercel/blob";
+import { del, head } from "@vercel/blob";
 import { auth } from "@/auth";
 
 export const maxDuration = 60;
@@ -140,10 +140,19 @@ export async function POST(req: NextRequest) {
 
   const isVideo = (fileType || "").startsWith("video");
 
-  // Fetch file from Vercel Blob
+  // Fetch file from Vercel Blob (verify existence first, then fetch with retry)
   let fileBlob: Blob;
   try {
-    const blobRes = await fetch(blobUrl);
+    // Verify blob exists via SDK (uses BLOB_READ_WRITE_TOKEN internally)
+    const blobInfo = await head(blobUrl);
+    const downloadUrl = blobInfo.downloadUrl || blobUrl;
+
+    let blobRes = await fetch(downloadUrl);
+    // Retry once after a short delay if 404 (propagation delay)
+    if (!blobRes.ok && blobRes.status === 404) {
+      await new Promise((r) => setTimeout(r, 2000));
+      blobRes = await fetch(downloadUrl);
+    }
     if (!blobRes.ok) throw new Error(`Blob fetch failed: ${blobRes.status}`);
     fileBlob = await blobRes.blob();
   } catch (err) {
