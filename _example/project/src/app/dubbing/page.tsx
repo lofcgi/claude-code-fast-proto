@@ -143,8 +143,8 @@ export default function DubbingPage() {
     if (!ACCEPTED_TYPES.includes(f.type)) {
       return "Unsupported file format. Please use MP3, WAV, MP4, M4A, or WEBM.";
     }
-    if (f.size > 4.5 * 1024 * 1024) {
-      return "File size exceeds 4.5MB limit.";
+    if (f.size > 25 * 1024 * 1024) {
+      return "File size exceeds 25MB limit.";
     }
     return null;
   };

@@ -111,9 +111,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (file.size > 4.5 * 1024 * 1024) {
+  if (file.size > 25 * 1024 * 1024) {
     return NextResponse.json(
-      { error: "File too large. Please use a file under 4.5MB." },
+      { error: "File size exceeds 25MB limit" },
       { status: 400 }
     );
   }
