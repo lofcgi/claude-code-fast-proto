@@ -28,6 +28,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             "video/quicktime",
           ],
           maximumSizeInBytes: 25 * 1024 * 1024, // 25MB
+          addRandomSuffix: true,
         };
       },
       onUploadCompleted: async () => {
