@@ -108,7 +108,7 @@ You'll need MCP servers configured. The repo includes `.mcp.json.example` with t
 
 ## Links
 
-- **Live demo**: https://project-nine-nu-52.vercel.app/
+- **Live demo**: https://project-nine-nu-52.vercel.app/ | https://project-kimanlee.vercel.app/
 - **GitHub**: [claude-code-best-of-n](https://github.com/lofcgi/claude-code-best-of-n)
 - **License**: MIT
 - Available in English and Korean
