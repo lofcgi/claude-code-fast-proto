@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { X, Play, Pause, RotateCcw, Scissors } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Scissors, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MAX_RANGE = 60;
@@ -35,47 +35,63 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
   const isVideo = file.type.startsWith("video/");
   const initialEnd = Math.min(MAX_RANGE, duration);
 
+  // --- Selection state ---
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(initialEnd);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playhead, setPlayhead] = useState(0);
-  const [dragging, setDragging] = useState<"start" | "end" | "region" | null>(null);
+  const [dragging, setDragging] = useState<"start" | "end" | "region" | "minimap" | null>(null);
 
   const [startInput, setStartInput] = useState(formatMMSS(0));
   const [endInput, setEndInput] = useState(formatMMSS(initialEnd));
 
+  // --- Zoom viewport state ---
+  // Zoom window = selection ± 30s padding (~2 min total)
+  // So 1-min selection fills ~50% of zoom timeline
+  const ZOOM_PADDING = 30;
+  const zoomWindow = useMemo(() => {
+    if (duration <= MAX_RANGE * 2) return duration;
+    return Math.min(duration, MAX_RANGE + ZOOM_PADDING * 2);
+  }, [duration]);
+
+  const needsZoom = duration > MAX_RANGE * 2;
+
+  const [viewStart, setViewStart] = useState(0);
+  const viewEnd = viewStart + zoomWindow;
+
+  // --- Refs ---
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
-  const timelineRef = useRef<HTMLDivElement | null>(null);
+  const zoomTimelineRef = useRef<HTMLDivElement | null>(null);
+  const minimapRef = useRef<HTMLDivElement | null>(null);
   const animRef = useRef<number>(0);
   const mediaUrlRef = useRef<string>("");
-  const dragStartRef = useRef<{ x: number; startT: number; endT: number }>({ x: 0, startT: 0, endT: 0 });
+  const dragStartRef = useRef<{ x: number; startT: number; endT: number; viewS: number }>({
+    x: 0, startT: 0, endT: 0, viewS: 0,
+  });
+
+  // --- Auto-pan zoom viewport to follow selection ---
+  const panToSelection = useCallback((s: number, e: number) => {
+    if (!needsZoom) return;
+    // Center viewport on selection with padding
+    const newViewStart = clamp(s - ZOOM_PADDING, 0, duration - zoomWindow);
+    setViewStart(newViewStart);
+  }, [needsZoom, zoomWindow, duration]);
 
   // Create object URL for media preview
   useEffect(() => {
     mediaUrlRef.current = URL.createObjectURL(file);
-    return () => {
-      URL.revokeObjectURL(mediaUrlRef.current);
-    };
+    return () => { URL.revokeObjectURL(mediaUrlRef.current); };
   }, [file]);
 
-  // Sync input fields when times change (not during manual input)
-  useEffect(() => {
-    setStartInput(formatMMSS(startTime));
-  }, [startTime]);
-
-  useEffect(() => {
-    setEndInput(formatMMSS(endTime));
-  }, [endTime]);
+  // Sync input fields
+  useEffect(() => { setStartInput(formatMMSS(startTime)); }, [startTime]);
+  useEffect(() => { setEndInput(formatMMSS(endTime)); }, [endTime]);
 
   // Playback loop
   useEffect(() => {
-    if (!isPlaying) {
-      cancelAnimationFrame(animRef.current);
-      return;
-    }
+    if (!isPlaying) { cancelAnimationFrame(animRef.current); return; }
     const media = mediaRef.current;
     if (!media) return;
-
     const tick = () => {
       if (media.currentTime >= endTime) {
         media.pause();
@@ -93,7 +109,6 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
   const togglePlay = useCallback(() => {
     const media = mediaRef.current;
     if (!media) return;
-
     if (isPlaying) {
       media.pause();
       setIsPlaying(false);
@@ -101,7 +116,7 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
       if (media.currentTime < startTime || media.currentTime >= endTime) {
         media.currentTime = startTime;
       }
-      media.play();
+      media.play().catch(() => {});
       setIsPlaying(true);
     }
   }, [isPlaying, startTime, endTime]);
@@ -112,19 +127,14 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
     setPlayhead(time);
   }, []);
 
-  // --- Range constraint helpers ---
+  // --- Range constraint ---
   const applyRange = useCallback((newStart: number, newEnd: number) => {
     newStart = clamp(newStart, 0, duration);
     newEnd = clamp(newEnd, 0, duration);
-    if (newEnd - newStart > MAX_RANGE) {
-      newEnd = newStart + MAX_RANGE;
-    }
+    if (newEnd - newStart > MAX_RANGE) newEnd = newStart + MAX_RANGE;
     if (newEnd - newStart < MIN_RANGE) {
-      if (newEnd < duration - MIN_RANGE) {
-        newEnd = newStart + MIN_RANGE;
-      } else {
-        newStart = newEnd - MIN_RANGE;
-      }
+      if (newEnd < duration - MIN_RANGE) newEnd = newStart + MIN_RANGE;
+      else newStart = newEnd - MIN_RANGE;
     }
     newStart = clamp(newStart, 0, duration);
     newEnd = clamp(newEnd, 0, duration);
@@ -132,9 +142,19 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
     setEndTime(newEnd);
   }, [duration]);
 
-  // --- Pointer event handlers for timeline ---
-  const getTimeFromPointer = useCallback((clientX: number): number => {
-    const rect = timelineRef.current?.getBoundingClientRect();
+  // --- Zoom timeline pointer helpers ---
+  const getTimeFromZoom = useCallback((clientX: number): number => {
+    const rect = zoomTimelineRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
+    const visibleStart = needsZoom ? viewStart : 0;
+    const visibleEnd = needsZoom ? viewEnd : duration;
+    return visibleStart + ratio * (visibleEnd - visibleStart);
+  }, [needsZoom, viewStart, viewEnd, duration]);
+
+  // --- Minimap pointer helpers ---
+  const getTimeFromMinimap = useCallback((clientX: number): number => {
+    const rect = minimapRef.current?.getBoundingClientRect();
     if (!rect) return 0;
     const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
     return ratio * duration;
@@ -144,39 +164,71 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     setDragging(target);
-    dragStartRef.current = { x: e.clientX, startT: startTime, endT: endTime };
-  }, [startTime, endTime]);
+    dragStartRef.current = { x: e.clientX, startT: startTime, endT: endTime, viewS: viewStart };
+  }, [startTime, endTime, viewStart]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragging) return;
-    const time = getTimeFromPointer(e.clientX);
+    if (!dragging || dragging === "minimap") return;
+    const time = getTimeFromZoom(e.clientX);
 
     if (dragging === "start") {
       const newStart = clamp(time, 0, endTime - MIN_RANGE);
-      const newEnd = newStart + MAX_RANGE < endTime ? endTime : newStart + MAX_RANGE;
-      applyRange(newStart, Math.min(newEnd, endTime));
+      applyRange(newStart, endTime);
       seekTo(newStart);
     } else if (dragging === "end") {
       const newEnd = clamp(time, startTime + MIN_RANGE, duration);
-      const newStart = newEnd - MAX_RANGE > startTime ? startTime : newEnd - MAX_RANGE;
-      applyRange(Math.max(newStart, startTime), newEnd);
+      applyRange(startTime, newEnd);
       seekTo(newEnd);
     } else if (dragging === "region") {
-      const dx = e.clientX - dragStartRef.current.x;
-      const rect = timelineRef.current?.getBoundingClientRect();
+      const rect = zoomTimelineRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const dt = (dx / rect.width) * duration;
+      const visibleDur = needsZoom ? zoomWindow : duration;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dt = (dx / rect.width) * visibleDur;
       const rangeDur = dragStartRef.current.endT - dragStartRef.current.startT;
       let newStart = dragStartRef.current.startT + dt;
       newStart = clamp(newStart, 0, duration - rangeDur);
       applyRange(newStart, newStart + rangeDur);
       seekTo(newStart);
+      // Auto-pan viewport if dragging near edge
+      if (needsZoom) {
+        const newMid = newStart + rangeDur / 2;
+        const halfWin = zoomWindow / 2;
+        setViewStart(clamp(newMid - halfWin, 0, duration - zoomWindow));
+      }
     }
-  }, [dragging, startTime, endTime, duration, applyRange, getTimeFromPointer, seekTo]);
+  }, [dragging, startTime, endTime, duration, needsZoom, zoomWindow, applyRange, getTimeFromZoom, seekTo]);
 
-  const handlePointerUp = useCallback(() => {
-    setDragging(null);
-  }, []);
+  // --- Minimap drag ---
+  const handleMinimapPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setDragging("minimap");
+    // Move selection to clicked position
+    const clickedTime = getTimeFromMinimap(e.clientX);
+    const rangeDur = endTime - startTime;
+    const newStart = clamp(clickedTime - rangeDur / 2, 0, duration - rangeDur);
+    applyRange(newStart, newStart + rangeDur);
+    seekTo(newStart);
+    // Viewport follows
+    const newViewStart = clamp(newStart - ZOOM_PADDING, 0, duration - zoomWindow);
+    setViewStart(newViewStart);
+    dragStartRef.current = { x: e.clientX, startT: newStart, endT: newStart + rangeDur, viewS: newViewStart };
+  }, [getTimeFromMinimap, zoomWindow, duration, startTime, endTime, applyRange, seekTo]);
+
+  const handleMinimapPointerMove = useCallback((e: React.PointerEvent) => {
+    if (dragging !== "minimap") return;
+    const clickedTime = getTimeFromMinimap(e.clientX);
+    const rangeDur = dragStartRef.current.endT - dragStartRef.current.startT;
+    const newStart = clamp(clickedTime - rangeDur / 2, 0, duration - rangeDur);
+    applyRange(newStart, newStart + rangeDur);
+    seekTo(newStart);
+    // Viewport follows selection
+    const newViewStart = clamp(newStart - ZOOM_PADDING, 0, duration - zoomWindow);
+    setViewStart(newViewStart);
+  }, [dragging, getTimeFromMinimap, zoomWindow, duration, applyRange, seekTo]);
+
+  const handlePointerUp = useCallback(() => { setDragging(null); }, []);
 
   // --- Time input handlers ---
   const handleStartInputBlur = useCallback(() => {
@@ -184,40 +236,63 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
     if (parsed !== null) {
       applyRange(parsed, endTime);
       seekTo(parsed);
+      panToSelection(parsed, endTime);
     } else {
       setStartInput(formatMMSS(startTime));
     }
-  }, [startInput, endTime, startTime, applyRange, seekTo]);
+  }, [startInput, endTime, startTime, applyRange, seekTo, panToSelection]);
 
   const handleEndInputBlur = useCallback(() => {
     const parsed = parseMMSS(endInput);
     if (parsed !== null) {
       applyRange(startTime, parsed);
       seekTo(parsed);
+      panToSelection(startTime, parsed);
     } else {
       setEndInput(formatMMSS(endTime));
     }
-  }, [endInput, startTime, endTime, applyRange, seekTo]);
+  }, [endInput, startTime, endTime, applyRange, seekTo, panToSelection]);
 
   const handleReset = useCallback(() => {
     applyRange(0, Math.min(MAX_RANGE, duration));
     seekTo(0);
     setIsPlaying(false);
     mediaRef.current?.pause();
-  }, [duration, applyRange, seekTo]);
+    if (needsZoom) setViewStart(0);
+  }, [duration, needsZoom, applyRange, seekTo]);
 
-  // --- Computed values ---
-  const selectedDuration = endTime - startTime;
-  const startPct = (startTime / duration) * 100;
-  const endPct = (endTime / duration) * 100;
-  const playheadPct = (playhead / duration) * 100;
+  // --- Computed values for zoom timeline ---
+  const visibleStart = needsZoom ? viewStart : 0;
+  const visibleEnd = needsZoom ? viewEnd : duration;
+  const visibleDur = visibleEnd - visibleStart;
 
-  // Time markers
-  const markerInterval = duration > 180 ? 30 : 15;
-  const markers: number[] = [];
-  for (let t = 0; t <= duration; t += markerInterval) {
-    markers.push(t);
+  const toZoomPct = (t: number) => ((t - visibleStart) / visibleDur) * 100;
+  const startPct = clamp(toZoomPct(startTime), 0, 100);
+  const endPct = clamp(toZoomPct(endTime), 0, 100);
+  const playheadPct = clamp(toZoomPct(playhead), 0, 100);
+
+  // --- Minimap computed values ---
+  const mmStartPct = (startTime / duration) * 100;
+  const mmEndPct = (endTime / duration) * 100;
+  const mmViewStartPct = (viewStart / duration) * 100;
+  const mmViewWidthPct = (zoomWindow / duration) * 100;
+
+  // Zoom timeline markers
+  const zoomMarkerInterval = visibleDur > 180 ? 30 : visibleDur > 60 ? 15 : 5;
+  const zoomMarkers: number[] = [];
+  const firstMarker = Math.ceil(visibleStart / zoomMarkerInterval) * zoomMarkerInterval;
+  for (let t = firstMarker; t <= visibleEnd; t += zoomMarkerInterval) {
+    zoomMarkers.push(t);
   }
+
+  // Minimap markers
+  const mmMarkerInterval = duration > 600 ? 120 : duration > 180 ? 60 : 30;
+  const mmMarkers: number[] = [];
+  for (let t = 0; t <= duration; t += mmMarkerInterval) {
+    mmMarkers.push(t);
+  }
+
+  const selectedDuration = endTime - startTime;
 
   return (
     <motion.div
@@ -238,10 +313,7 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
             <Scissors className="w-5 h-5" />
             Trim Selection
           </h3>
-          <button
-            onClick={onCancel}
-            className="p-2 hover:bg-secondary rounded-lg transition-colors"
-          >
+          <button onClick={onCancel} className="p-2 hover:bg-secondary rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -268,7 +340,6 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
                 />
               </div>
             )}
-            {/* Play/pause overlay */}
             {!isPlaying && (
               <button
                 onClick={togglePlay}
@@ -289,7 +360,7 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
             onChange={(e) => setStartInput(e.target.value)}
             onBlur={handleStartInputBlur}
             onKeyDown={(e) => e.key === "Enter" && handleStartInputBlur()}
-            className="w-16 text-center text-sm font-mono bg-secondary border border-border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand"
+            className="w-20 text-center text-sm font-mono bg-secondary border border-border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-brand"
           />
           <span className="text-muted-foreground">—</span>
           <input
@@ -297,40 +368,97 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
             onChange={(e) => setEndInput(e.target.value)}
             onBlur={handleEndInputBlur}
             onKeyDown={(e) => e.key === "Enter" && handleEndInputBlur()}
-            className="w-16 text-center text-sm font-mono bg-secondary border border-border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand"
+            className="w-20 text-center text-sm font-mono bg-secondary border border-border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-brand"
           />
           <div className="ml-auto text-sm text-muted-foreground font-mono">
             {formatMMSS(selectedDuration)}
           </div>
         </div>
 
-        {/* Timeline */}
-        <div className="px-5 pt-4 pb-2">
+        {/* Minimap (only for long files) */}
+        {needsZoom && (
+          <div className="px-5 pt-4 pb-1">
+            <div className="flex items-center gap-2 mb-1.5">
+              <ZoomIn className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+                Overview — drag to navigate
+              </span>
+            </div>
+            <div
+              ref={minimapRef}
+              className="relative h-8 bg-secondary rounded-md select-none touch-none cursor-pointer"
+              onPointerDown={handleMinimapPointerDown}
+              onPointerMove={handleMinimapPointerMove}
+              onPointerUp={handlePointerUp}
+            >
+              {/* Full dimmed background */}
+              <div className="absolute inset-0 rounded-md" />
+
+              {/* Viewport window */}
+              <div
+                className="absolute inset-y-0 border-2 border-brand/60 bg-brand/10 rounded-sm transition-[left,width] duration-75"
+                style={{ left: `${mmViewStartPct}%`, width: `${mmViewWidthPct}%` }}
+              />
+
+              {/* Selection highlight */}
+              <div
+                className="absolute inset-y-1 bg-brand/50 rounded-sm pointer-events-none"
+                style={{ left: `${mmStartPct}%`, width: `${mmEndPct - mmStartPct}%` }}
+              />
+
+              {/* Minimap time markers */}
+              <div className="absolute -bottom-4 left-0 right-0 h-4">
+                {mmMarkers.map((t) => (
+                  <span
+                    key={t}
+                    className="absolute text-[9px] text-muted-foreground/60 -translate-x-1/2 font-mono"
+                    style={{ left: `${(t / duration) * 100}%` }}
+                  >
+                    {formatMMSS(t)}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="h-4" />
+          </div>
+        )}
+
+        {/* Zoom Timeline */}
+        <div className="px-5 pt-2 pb-2">
           <div
-            ref={timelineRef}
+            ref={zoomTimelineRef}
             className="relative h-12 bg-secondary rounded-lg select-none touch-none"
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           >
             {/* Dimmed regions (outside selection) */}
-            <div
-              className="absolute inset-y-0 left-0 bg-black/40 rounded-l-lg pointer-events-none"
-              style={{ width: `${startPct}%` }}
-            />
-            <div
-              className="absolute inset-y-0 right-0 bg-black/40 rounded-r-lg pointer-events-none"
-              style={{ width: `${100 - endPct}%` }}
-            />
+            {startPct > 0 && (
+              <div
+                className="absolute inset-y-0 left-0 bg-black/40 rounded-l-lg pointer-events-none"
+                style={{ width: `${startPct}%` }}
+              />
+            )}
+            {endPct < 100 && (
+              <div
+                className="absolute inset-y-0 right-0 bg-black/40 rounded-r-lg pointer-events-none"
+                style={{ width: `${100 - endPct}%` }}
+              />
+            )}
 
             {/* Selected region (draggable) */}
-            <div
-              className="absolute inset-y-0 bg-brand/20 cursor-grab active:cursor-grabbing"
-              style={{ left: `${startPct}%`, width: `${endPct - startPct}%` }}
-              onPointerDown={(e) => handlePointerDown(e, "region")}
-            />
+            {startPct < 100 && endPct > 0 && (
+              <div
+                className="absolute inset-y-0 bg-brand/20 cursor-grab active:cursor-grabbing"
+                style={{
+                  left: `${Math.max(startPct, 0)}%`,
+                  width: `${Math.min(endPct, 100) - Math.max(startPct, 0)}%`,
+                }}
+                onPointerDown={(e) => handlePointerDown(e, "region")}
+              />
+            )}
 
             {/* Playhead */}
-            {playhead >= startTime && playhead <= endTime && (
+            {playhead >= visibleStart && playhead <= visibleEnd && (
               <div
                 className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none z-10"
                 style={{ left: `${playheadPct}%` }}
@@ -338,31 +466,35 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
             )}
 
             {/* Start handle */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-col-resize"
-              style={{ left: `${startPct}%` }}
-              onPointerDown={(e) => handlePointerDown(e, "start")}
-            >
-              <div className={`w-5 h-10 rounded-md border-2 border-white shadow-lg transition-colors ${dragging === "start" ? "bg-brand scale-110" : "bg-brand/80"}`} />
-            </div>
+            {startTime >= visibleStart && startTime <= visibleEnd && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-col-resize"
+                style={{ left: `${startPct}%` }}
+                onPointerDown={(e) => handlePointerDown(e, "start")}
+              >
+                <div className={`w-6 h-12 sm:w-5 sm:h-10 rounded-md border-2 border-white shadow-lg transition-colors ${dragging === "start" ? "bg-brand scale-110" : "bg-brand/80"}`} />
+              </div>
+            )}
 
             {/* End handle */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-col-resize"
-              style={{ left: `${endPct}%` }}
-              onPointerDown={(e) => handlePointerDown(e, "end")}
-            >
-              <div className={`w-5 h-10 rounded-md border-2 border-white shadow-lg transition-colors ${dragging === "end" ? "bg-brand scale-110" : "bg-brand/80"}`} />
-            </div>
+            {endTime >= visibleStart && endTime <= visibleEnd && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-col-resize"
+                style={{ left: `${endPct}%` }}
+                onPointerDown={(e) => handlePointerDown(e, "end")}
+              >
+                <div className={`w-6 h-12 sm:w-5 sm:h-10 rounded-md border-2 border-white shadow-lg transition-colors ${dragging === "end" ? "bg-brand scale-110" : "bg-brand/80"}`} />
+              </div>
+            )}
           </div>
 
-          {/* Time markers */}
+          {/* Zoom time markers */}
           <div className="relative h-5 mt-1">
-            {markers.map((t) => (
+            {zoomMarkers.map((t) => (
               <span
                 key={t}
                 className="absolute text-[10px] text-muted-foreground -translate-x-1/2 font-mono"
-                style={{ left: `${(t / duration) * 100}%` }}
+                style={{ left: `${toZoomPct(t)}%` }}
               >
                 {formatMMSS(t)}
               </span>
@@ -372,11 +504,7 @@ export function TrimEditor({ file, duration, onApply, onCancel }: TrimEditorProp
 
         {/* Buttons */}
         <div className="flex gap-3 p-5 pt-2">
-          <Button
-            variant="outline"
-            className="flex-1 rounded-xl"
-            onClick={handleReset}
-          >
+          <Button variant="outline" className="flex-1 rounded-xl" onClick={handleReset}>
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
           </Button>

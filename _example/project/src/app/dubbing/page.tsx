@@ -213,9 +213,6 @@ export default function DubbingPage() {
     if (!ACCEPTED_TYPES.includes(f.type)) {
       return "Unsupported file format. Please use MP3, WAV, MP4, M4A, or WEBM.";
     }
-    if (f.size > 100 * 1024 * 1024) {
-      return "File size exceeds 100MB limit.";
-    }
     return null;
   };
 
@@ -258,6 +255,9 @@ export default function DubbingPage() {
 
     try {
       // Step 1: Trim if needed (client-side)
+      if (file.size > 500 * 1024 * 1024) {
+        toast.info("Processing large file — this may take a moment...");
+      }
       let fileToUpload = file;
       if (trimRange) {
         const segDuration = trimRange.end - trimRange.start;
@@ -272,7 +272,7 @@ export default function DubbingPage() {
 
       // Safety check: trimmed file must be under 25MB for upload
       if (fileToUpload.size > 25 * 1024 * 1024) {
-        throw new Error("File is still too large after trimming. Please use a shorter or smaller file.");
+        throw new Error("File exceeds 25MB upload limit. Try trimming to a shorter segment or using a lower quality file.");
       }
 
       setCurrentStep(2); // Upload step
@@ -312,7 +312,7 @@ export default function DubbingPage() {
         } catch {
           const text = await res.text().catch(() => "");
           if (res.status === 413 || text.includes("Request Entity Too Large")) {
-            errorMessage = "File too large. Please use a file under 4.5MB.";
+            errorMessage = "File too large after trimming. Please select a shorter segment.";
           } else {
             errorMessage = text || `Server error (${res.status})`;
           }
@@ -456,7 +456,7 @@ export default function DubbingPage() {
       audio.pause();
       video?.pause();
     } else {
-      audio.play();
+      audio.play().catch(() => {});
       video?.play().catch(() => {});
     }
     setIsPlaying(!isPlaying);
@@ -713,7 +713,7 @@ export default function DubbingPage() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
-                  className={`relative border-2 border-dashed rounded-3xl p-16 text-center transition-colors ${
+                  className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-16 text-center transition-colors ${
                     isDragOver
                       ? "border-brand bg-brand/5"
                       : "border-border hover:border-brand/50"
@@ -737,10 +737,11 @@ export default function DubbingPage() {
                     </div>
                     <div>
                       <p className="text-lg font-medium">
-                        Drop your file here or click to browse
+                        <span className="hidden sm:inline">Drop your file here or click to browse</span>
+                        <span className="sm:hidden">Tap to select a file</span>
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Supports MP3, WAV, MP4, M4A, WEBM (max 25MB)
+                        Supports MP3, WAV, MP4, M4A, WEBM — long files are auto-trimmed to 1 min
                       </p>
                     </div>
                   </div>

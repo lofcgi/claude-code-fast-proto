@@ -60,37 +60,49 @@ export async function trimMedia(
   const inputName = `trim_input.${ext}`;
   const outputName = `trim_output.${ext}`;
 
-  await ff.writeFile(inputName, await fetchFile(file));
+  try {
+    await ff.writeFile(inputName, await fetchFile(file));
 
-  const isVideo = file.type.startsWith("video/");
-  const args = [
-    "-y",
-    ...(startTime > 0 ? ["-ss", String(startTime)] : []),
-    "-i",
-    inputName,
-    "-t",
-    String(maxSeconds),
-    ...(isVideo
-      ? ["-c:v", "copy", "-c:a", "aac", "-movflags", "+faststart"]
-      : ["-c", "copy"]),
-    outputName,
-  ];
+    const isVideo = file.type.startsWith("video/");
+    const args = [
+      "-y",
+      ...(startTime > 0 ? ["-ss", String(startTime)] : []),
+      "-i",
+      inputName,
+      "-t",
+      String(maxSeconds),
+      ...(isVideo
+        ? ["-c:v", "copy", "-c:a", "aac", "-movflags", "+faststart"]
+        : ["-c", "copy"]),
+      outputName,
+    ];
 
-  await ff.exec(args);
+    await ff.exec(args);
 
-  const data = await ff.readFile(outputName);
-  const uint8 =
-    data instanceof Uint8Array
-      ? data
-      : new TextEncoder().encode(data as string);
+    const data = await ff.readFile(outputName);
+    const uint8 =
+      data instanceof Uint8Array
+        ? data
+        : new TextEncoder().encode(data as string);
 
-  // Cleanup virtual FS
-  await ff.deleteFile(inputName);
-  await ff.deleteFile(outputName);
+    const ab = new ArrayBuffer(uint8.byteLength);
+    new Uint8Array(ab).set(uint8);
 
-  const ab = new ArrayBuffer(uint8.byteLength);
-  new Uint8Array(ab).set(uint8);
-
-  const trimmedFile = new File([ab], file.name, { type: file.type });
-  return { file: trimmedFile, trimmed: true, originalDuration: duration };
+    const trimmedFile = new File([ab], file.name, { type: file.type });
+    return { file: trimmedFile, trimmed: true, originalDuration: duration };
+  } catch (err) {
+    throw new Error(
+      err instanceof Error && err.message.includes("media processor")
+        ? err.message
+        : "Failed to trim media. Try a smaller file or different format.",
+    );
+  } finally {
+    // Cleanup virtual FS regardless of success/failure
+    try {
+      await ff.deleteFile(inputName);
+    } catch { /* ignore */ }
+    try {
+      await ff.deleteFile(outputName);
+    } catch { /* ignore */ }
+  }
 }

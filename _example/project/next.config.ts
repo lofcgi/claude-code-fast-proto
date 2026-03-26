@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "25mb",
     },
   },
+  headers: async () => [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+      ],
+    },
+  ],
   images: {
     remotePatterns: [
       {
